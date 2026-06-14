@@ -166,7 +166,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 .addr-search-wrap input{width:100%;height:40px;padding:0 14px 0 34px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;background:#fff;color:var(--text)}
 .addr-search-wrap input:focus{border-color:var(--p)}
 .addr-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;opacity:.45}
-.addr-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(124,58,237,0.14);z-index:300;overflow:hidden}
+.addr-dropdown{display:none;position:fixed;background:#fff;border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(124,58,237,0.14);z-index:9999;overflow:hidden;max-height:280px;overflow-y:auto}
 .addr-suggestion{padding:10px 14px;font-size:12.5px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--borderl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
 .addr-suggestion:last-child{border-bottom:none}
 .addr-suggestion:hover{background:var(--px);color:var(--p)}
@@ -640,14 +640,37 @@ function gv(id){return document.getElementById(id)?.value?.trim()||''}
 
 // ── Address live search (public endpoint, no auth needed) ─
 let _portalAddrTimer=null, _portalAddrResults=[];
+const PORTAL_STATE_MAP={
+  'New South Wales':'NSW','Victoria':'VIC','Queensland':'QLD',
+  'South Australia':'SA','Western Australia':'WA','Tasmania':'TAS',
+  'Northern Territory':'NT','Australian Capital Territory':'ACT'
+};
+function positionPortalDropdown(){
+  const inp=document.getElementById('addrSearch2'),dd=document.getElementById('addrDropdown2');
+  if(!inp||!dd)return;
+  const r=inp.getBoundingClientRect();
+  dd.style.top=(r.bottom+4)+'px';dd.style.left=r.left+'px';dd.style.width=r.width+'px';
+}
 async function searchAddressPortal(q){
   clearTimeout(_portalAddrTimer);
   const dd=document.getElementById('addrDropdown2');
   if(q.length<3){dd.style.display='none';return;}
   _portalAddrTimer=setTimeout(async()=>{
     try{
-      const r=await fetch('/api/address-search?q='+encodeURIComponent(q));
-      const data=await r.json();
+      // Direct Nominatim call — works from browser without server outbound restrictions
+      const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=au&format=json&addressdetails=1&limit=7&dedupe=1`;
+      const resp=await fetch(url,{headers:{'Accept':'application/json'}});
+      const results=await resp.json();
+      let data=results.map(item=>{
+        const a=item.address||{};
+        const street=[a.house_number,a.road].filter(Boolean).join(' ');
+        const suburb=a.suburb||a.neighbourhood||a.city_district||a.city||a.town||a.village||'';
+        const state=PORTAL_STATE_MAP[a.state]||a.state_district||a.state||'';
+        const postcode=a.postcode||'';
+        return(street||suburb)?{display:item.display_name,street,suburb,state,postcode}:null;
+      }).filter(Boolean);
+      // Fallback to server proxy if direct call returns nothing
+      if(!data.length){const r2=await fetch('/api/address-search?q='+encodeURIComponent(q));data=await r2.json().catch(()=>[]);}
       _portalAddrResults=data;
       if(!data.length){dd.style.display='none';return;}
       dd.innerHTML=data.map((a,i)=>
@@ -655,9 +678,10 @@ async function searchAddressPortal(q){
         `${a.street?`<strong>${a.street}</strong>, `:''}${a.suburb}${a.state?' '+a.state:''}${a.postcode?' '+a.postcode:''}`+
         `<small>${a.display}</small></div>`
       ).join('');
+      positionPortalDropdown();
       dd.style.display='block';
     }catch(e){dd.style.display='none';}
-  },300);
+  },350);
 }
 function fillAddressPortal(idx){
   const r=_portalAddrResults[idx];if(!r)return;
@@ -668,7 +692,9 @@ function fillAddressPortal(idx){
   document.getElementById('addrSearch2').value='';
   document.getElementById('addrDropdown2').style.display='none';
 }
-function hideAddrDrop(){setTimeout(()=>{const d=document.getElementById('addrDropdown2');if(d)d.style.display='none';},160);}
+function hideAddrDrop(){setTimeout(()=>{const d=document.getElementById('addrDropdown2');if(d)d.style.display='none';},200);}
+window.addEventListener('scroll',()=>{const d=document.getElementById('addrDropdown2');if(d&&d.style.display==='block')positionPortalDropdown();},true);
+window.addEventListener('resize',()=>{const d=document.getElementById('addrDropdown2');if(d)d.style.display='none';});
 
 function addAddress() {
   const s=gv('addrStreet'),sub=gv('addrSuburb'),st=gv('addrState'),pc=gv('addrPC');
