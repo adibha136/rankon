@@ -12,6 +12,10 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 3077;
 
+// Trust Hostinger's Nginx reverse proxy so req.ip contains the real
+// visitor IP from X-Forwarded-For instead of 127.0.0.1
+app.set('trust proxy', 1);
+
 // ── MySQL Config (from .env) ──────────────────────────────
 // Use socket (DB_SOCKET) if set — avoids IPv6/TCP permission issues on shared hosting
 const DB_CONFIG = process.env.DB_SOCKET
@@ -335,6 +339,29 @@ function rdapLookup(domain) {
       }).on('error', () => resolve(FAIL));
     }
     doFetch(`https://rdap.org/domain/${domain}`, 0);
+  });
+}
+
+// ── IP Geolocation (ip-api.com — free, no key, 45 req/min) ──
+const PRIVATE_IP = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1$|::ffff:127\.)/;
+
+function getIpGeo(ip) {
+  return new Promise((resolve) => {
+    const clean = ip.replace('::ffff:', '');
+    if (!clean || PRIVATE_IP.test(clean)) return resolve({}); // skip local/private IPs
+    const url = `https://ip-api.com/json/${clean}?fields=status,city,regionName,country,isp`;
+    https.get(url, { headers: { 'User-Agent': 'Rankon-CRM/1.0' } }, (res) => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(body);
+          resolve(j.status === 'success'
+            ? { city: j.city || '', region: j.regionName || '', country: j.country || '', isp: j.isp || '' }
+            : {});
+        } catch (e) { resolve({}); }
+      });
+    }).on('error', () => resolve({}));
   });
 }
 
@@ -711,7 +738,17 @@ app.post('/api/portal/:token/access', async (req, res) => {
     if (settings.pinRequired && client.pin && req.body.pin !== client.pin) {
       return res.status(401).json({ error: 'invalid_pin' });
     }
-    const accessLog = [...(client.accessLog || []).slice(-19), { at: new Date().toISOString(), ip: req.ip || '' }];
+    // Extract real visitor IP: X-Forwarded-For first (set by Nginx), then req.ip
+    const rawIp = (req.headers['x-forwarded-for'] || req.ip || '').split(',')[0].trim().replace('::ffff:', '');
+    const geo = await getIpGeo(rawIp);
+    const accessLog = [...(client.accessLog || []).slice(-19), {
+      at: new Date().toISOString(),
+      ip: rawIp,
+      city:    geo.city    || '',
+      region:  geo.region  || '',
+      country: geo.country || '',
+      isp:     geo.isp     || ''
+    }];
     await pool.execute(
       'UPDATE clients SET last_seen = ?, access_log = ? WHERE id = ?',
       [new Date(), JSON.stringify(accessLog), client.id]

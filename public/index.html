@@ -1073,10 +1073,17 @@ function renderTable(){
       ? `<br><span style="font-size:10px;color:var(--rk-success);font-weight:600">📧 Sent ${fmtDate(c.emailSentAt)}</span>`
       : '';
     const accessCount = (c.accessLog||[]).length;
-    const lastIp = accessCount ? (c.accessLog[accessCount-1].ip||'').replace('::ffff:','').replace('::1','localhost') : '';
+    const lastEntry   = accessCount ? c.accessLog[accessCount-1] : null;
+    const lastIp      = lastEntry ? (lastEntry.ip||'').replace('::ffff:','').replace('::1','localhost') : '';
+    const lastLoc     = lastEntry ? [lastEntry.city, lastEntry.region, lastEntry.country].filter(Boolean).join(', ') : '';
+    const lastIsp     = lastEntry ? (lastEntry.isp||'') : '';
     const trackingHtml = accessCount
-      ? `<span style="font-size:11px;background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;padding:2px 8px;border-radius:20px;font-weight:600">👁 ${accessCount} open${accessCount>1?'s':''}</span>
-         <br><span style="font-size:11px;color:var(--rk-muted-light)">${lastIp}</span>`
+      ? `<span style="font-size:11px;background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;padding:2px 8px;border-radius:20px;font-weight:600">👁 ${accessCount} open${accessCount>1?'s':''}</span>`+
+        `<br><span style="font-size:11px;color:var(--rk-muted-light);line-height:1.6">`+
+        `🌐 ${lastIp||'—'}`+
+        (lastLoc ? `<br>📍 ${lastLoc}` : '')+
+        (lastIsp ? `<br>🏢 ${lastIsp}` : '')+
+        `</span>`
       : '<span style="color:var(--rk-muted-light);font-size:12px">Not opened</span>';
     return `<tr>
     <td><strong>${c.businessName||'<em style="color:#9898c0">Unnamed</em>'}</strong>${c.tokenExpired?'<br><span style="font-size:10px;color:var(--rk-warning)">⏰ Link expired</span>':''}${emailTag}</td>
