@@ -1212,36 +1212,38 @@ function _renderViewModal(c){
     </div>
   </div>`);
 
-  // ── Social Media ──────────────────────────────────────────
-  const hasSocial = social.facebook||social.instagram||social.tiktok||social.linkedin;
-  if(hasSocial) sections.push(`<div class="vs"><div class="vs-title">📱 Social Media</div>
-    <div class="vs-grid">
-      ${social.facebook  ? _vr('Facebook Page', social.facebook, social.facebook) : ''}
-      ${social.instagram ? _vr('Instagram', social.instagram, social.instagram.startsWith('http')?social.instagram:null) : ''}
-      ${social.tiktok    ? _vr('TikTok', social.tiktok) : ''}
-      ${social.linkedin  ? _vr('LinkedIn', social.linkedin, social.linkedin) : ''}
-    </div>
-  </div>`);
-
-  // ── Google ────────────────────────────────────────────────
-  const hasGoogle = google.businessProfile||google.analyticsGA4||google.adsCID||google.searchConsole;
-  if(hasGoogle) sections.push(`<div class="vs"><div class="vs-title">🔍 Google</div>
-    <div class="vs-grid">
-      ${google.businessProfile ? _vr('Business Profile', google.businessProfile, google.businessProfile) : ''}
-      ${google.analyticsGA4    ? _vr('GA4 Property', google.analyticsGA4) : ''}
-      ${google.adsCID          ? _vr('Google Ads CID', google.adsCID) : ''}
-      ${google.searchConsole   ? _vr('Search Console', google.searchConsole) : ''}
-    </div>
-  </div>`);
-
-  // ── Advertising ───────────────────────────────────────────
-  const hasAds = ads.microsoftAds||ads.metaAds;
-  if(hasAds) sections.push(`<div class="vs"><div class="vs-title">📢 Advertising</div>
-    <div class="vs-grid">
-      ${ads.microsoftAds ? _vr('Microsoft Ads', ads.microsoftAds) : ''}
-      ${ads.metaAds      ? _vr('Meta Ads Manager', ads.metaAds) : ''}
-    </div>
-  </div>`);
+  // ── Platform Access Status ────────────────────────────────
+  // Static platform definitions (mirrors client.html getPlatforms)
+  const PLAT_DEFS = [
+    { id:'facebook',  name:'Facebook Page',           icon:'📘', val: social.facebook },
+    { id:'instagram', name:'Instagram Business',       icon:'📸', val: social.instagram },
+    { id:'gbp',       name:'Google Business Profile',  icon:'🗺', val: google.businessProfile },
+    { id:'ga4',       name:'Google Analytics (GA4)',   icon:'📊', val: google.analyticsGA4 },
+    { id:'gads',      name:'Google Ads',               icon:'📢', val: google.adsCID },
+    { id:'gsc',       name:'Google Search Console',    icon:'🔍', val: google.searchConsole },
+    { id:'msads',     name:'Microsoft / Bing Ads',     icon:'🪟', val: ads.microsoftAds },
+    { id:'metaads',   name:'Meta Ads Manager',         icon:'📣', val: ads.metaAds },
+    { id:'tiktok',    name:'TikTok Business',          icon:'🎵', val: social.tiktok },
+    { id:'linkedin',  name:'LinkedIn Company Page',    icon:'💼', val: social.linkedin },
+  ];
+  const ps = c.platformStatus || {};
+  const platRows = PLAT_DEFS.map(p => {
+    const s = ps[p.id] || {};
+    let badge, badgeStyle;
+    if (s.done)     { badge='✓ Done';   badgeStyle='background:#ecfdf5;color:#059669;border:1px solid #a7f3d0'; }
+    else if (s.na)  { badge='N/A';      badgeStyle='background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb'; }
+    else            { badge='Pending';  badgeStyle='background:#fffbeb;color:#b45309;border:1px solid #fde68a'; }
+    const valHtml = p.val
+      ? `<a href="${p.val.startsWith('http')?p.val:'#'}" target="_blank" style="color:var(--rk-muted);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle">${p.val}</a>`
+      : `<span style="color:var(--rk-muted-light);font-size:11px">—</span>`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--rk-border-light)">
+      <span style="font-size:16px;flex-shrink:0">${p.icon}</span>
+      <span style="font-size:13px;font-weight:600;flex:1;min-width:0">${p.name}</span>
+      <span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap;${badgeStyle}">${badge}</span>
+      <span style="min-width:120px;text-align:right">${valHtml}</span>
+    </div>`;
+  }).join('');
+  sections.push(`<div class="vs"><div class="vs-title">🔑 Platform Access</div>${platRows}</div>`);
 
   // ── Domains ───────────────────────────────────────────────
   if(domains.length) sections.push(`<div class="vs"><div class="vs-title">🌐 Domains</div>

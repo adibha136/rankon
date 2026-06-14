@@ -146,6 +146,8 @@ async function initDB() {
         active     TINYINT(1) DEFAULT 1
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
+    // Add platform_status column to clients if it doesn't exist (migration)
+    await conn.execute(`ALTER TABLE clients ADD COLUMN platform_status JSON DEFAULT NULL`).catch(() => {});
     // Sessions table — persists across server restarts / redeployments
     await conn.execute(`
       CREATE TABLE IF NOT EXISTS sessions (
@@ -227,9 +229,10 @@ function rowToClient(r) {
     business:    parseJSON(r.business,    {}),
     contact:     parseJSON(r.contact,     {}),
     social:      parseJSON(r.social,      {}),
-    google:      parseJSON(r.google_data, {}),
-    advertising: parseJSON(r.advertising, {}),
-    domains:     parseJSON(r.domains,     [])
+    google:         parseJSON(r.google_data,     {}),
+    advertising:    parseJSON(r.advertising,    {}),
+    domains:        parseJSON(r.domains,        []),
+    platformStatus: parseJSON(r.platform_status, {})
   };
 }
 
@@ -681,7 +684,8 @@ app.put('/api/clients/:id', requireAuth, async (req, res) => {
          token = ?, pin = ?, updated_at = ?, completed_at = ?,
          step = ?, completed = ?, last_seen = ?,
          access_log = ?, business = ?, contact = ?,
-         social = ?, google_data = ?, advertising = ?, domains = ?
+         social = ?, google_data = ?, advertising = ?, domains = ?,
+         platform_status = ?
        WHERE id = ?`,
       [
         merged.token,
@@ -691,13 +695,14 @@ app.put('/api/clients/:id', requireAuth, async (req, res) => {
         merged.step || 1,
         merged.completed ? 1 : 0,
         merged.lastSeen  ? new Date(merged.lastSeen) : null,
-        JSON.stringify(merged.accessLog   || []),
-        JSON.stringify(merged.business    || {}),
-        JSON.stringify(merged.contact     || {}),
-        JSON.stringify(merged.social      || {}),
-        JSON.stringify(merged.google      || {}),
-        JSON.stringify(merged.advertising || {}),
-        JSON.stringify(merged.domains     || []),
+        JSON.stringify(merged.accessLog      || []),
+        JSON.stringify(merged.business       || {}),
+        JSON.stringify(merged.contact        || {}),
+        JSON.stringify(merged.social         || {}),
+        JSON.stringify(merged.google         || {}),
+        JSON.stringify(merged.advertising    || {}),
+        JSON.stringify(merged.domains        || []),
+        JSON.stringify(merged.platformStatus || {}),
         existing.id
       ]
     );
@@ -769,16 +774,18 @@ app.post('/api/portal/:token/submit', async (req, res) => {
     await pool.execute(
       `UPDATE clients SET
          updated_at = ?, completed_at = ?, step = 3, completed = 1,
-         business = ?, contact = ?, social = ?, google_data = ?, advertising = ?, domains = ?
+         business = ?, contact = ?, social = ?, google_data = ?, advertising = ?, domains = ?,
+         platform_status = ?
        WHERE id = ?`,
       [
         now, now,
-        JSON.stringify(merged.business    || {}),
-        JSON.stringify(merged.contact     || {}),
-        JSON.stringify(merged.social      || {}),
-        JSON.stringify(merged.google      || {}),
-        JSON.stringify(merged.advertising || {}),
-        JSON.stringify(merged.domains     || []),
+        JSON.stringify(merged.business       || {}),
+        JSON.stringify(merged.contact        || {}),
+        JSON.stringify(merged.social         || {}),
+        JSON.stringify(merged.google         || {}),
+        JSON.stringify(merged.advertising    || {}),
+        JSON.stringify(merged.domains        || []),
+        JSON.stringify(merged.platformStatus || {}),
         existing.id
       ]
     );
