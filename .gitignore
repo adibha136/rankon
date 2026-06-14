@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment files (contain passwords - NEVER commit these)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# JSON file database (use MySQL instead)
+db/
+
+# Deployment/SSH scripts (contain server credentials)
+ssh-setup.js
+deploy.js
+deploy-and-start.js
+deploy-to-hostinger.js
+setupdb.js
+
+# Logs
+*.log
+rankon-crm.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# FTP ignore
+.ftpignore

@@ -1,0 +1,22 @@
+{
+  "name": "rankononboarding",
+  "version": "1.0.0",
+  "description": "Rankon client onboarding CRM",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.2",
+    "mysql2": "^3.22.5",
+    "nodemailer": "^8.0.11",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "basic-ftp": "^6.0.1",
+    "ssh2": "^1.17.0"
+  }
+}

@@ -1,0 +1,11 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(.*)$ http://127.0.0.1:3077/$1 [P,QSA,L]
+</IfModule>
+
+<IfModule mod_passenger.c>
+  PassengerAppType node
+  PassengerStartupFile server.js
+</IfModule>

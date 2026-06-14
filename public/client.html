@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rankon — Client Onboarding</title>
+<link rel="icon" type="image/jpeg" href="/favicon.jpg">
+<link rel="shortcut icon" type="image/jpeg" href="/favicon.jpg">
+<link rel="apple-touch-icon" href="/favicon.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#7C3AED;--pd:#6D28D9;--pl:#EDE9FE;--px:#F5F3FF;
+  --navy:#0d0d1a;--white:#fff;--bg:#f8f7ff;
+  --border:#e5e0f8;--borderl:#ede9fe;
+  --text:#0d0d1a;--muted:#6b6b9a;--mutedl:#9898c0;
+  --ok:#059669;--okbg:#ecfdf5;--okb:#a7f3d0;
+  --err:#dc2626;--errbg:#fef2f2;--errb:#fecaca;
+  --warn:#d97706;--warnbg:#fffbeb;--warnb:#fde68a;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;min-height:100vh}
+
+/* NAV */
+.nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;height:60px;position:sticky;top:0;z-index:50}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-text{font-size:17px;font-weight:800;color:var(--navy);letter-spacing:-.4px}
+.logo-text span{color:var(--p)}
+.nav-right{margin-left:auto;font-size:13px;color:var(--muted)}
+
+/* PAGE WRAPPER */
+.wrap{max-width:680px;margin:0 auto;padding:2rem 1rem 4rem}
+
+/* CARDS */
+.card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(124,58,237,.06);margin-bottom:1.25rem}
+.card-head{background:linear-gradient(135deg,var(--navy) 0%,#1e0a4a 100%);padding:1.75rem 1.75rem 1.5rem;position:relative;overflow:hidden}
+.card-head::after{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(124,58,237,.18);pointer-events:none}
+.card-head h1{font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-.3px}
+.card-head p{font-size:13px;color:rgba(255,255,255,.5)}
+.card-body{padding:1.75rem}
+
+/* STEP PROGRESS */
+.steps{display:flex;gap:0;background:var(--white);border-bottom:1.5px solid var(--border)}
+.step-tab{flex:1;display:flex;align-items:center;gap:8px;padding:.875rem 1.25rem;border-bottom:3px solid transparent}
+.step-tab.active{border-bottom-color:var(--p);background:var(--px)}
+.step-tab.done{border-bottom-color:var(--ok)}
+.step-n{width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-tab.active .step-n{background:var(--p);color:#fff}
+.step-tab.done .step-n{background:var(--ok);color:#fff}
+.step-label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.step-tab.active .step-label{color:var(--p)}
+.step-tab.done .step-label{color:var(--ok)}
+
+/* SECTION TITLES */
+.sec{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--p);margin-bottom:.75rem;padding-bottom:7px;border-bottom:1.5px solid var(--borderl)}
+
+/* FORM */
+.fg{display:grid;gap:13px;margin-bottom:1.25rem}
+.fg2{grid-template-columns:1fr 1fr}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.field label .req{color:var(--p)}
+.field input,.field select,.field textarea{height:40px;padding:0 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--text);outline:none;background:#fff;width:100%;font-family:'Inter',sans-serif;transition:border .15s}
+.field textarea{height:auto;padding:9px 12px;resize:none}
+.field input::placeholder,.field textarea::placeholder{color:var(--mutedl)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(124,58,237,.09)}
+
+/* ADDRESS */
+.addr-chip{background:var(--px);border:1.5px solid var(--borderl);border-radius:10px;padding:8px 11px;display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:7px}
+.chip-del{background:none;border:none;color:var(--mutedl);cursor:pointer;font-size:17px;line-height:1;padding:0 3px;border-radius:50%;transition:.15s}
+.chip-del:hover{color:var(--err);background:var(--errbg)}
+.add-row{display:flex;gap:7px;align-items:flex-end;flex-wrap:wrap}
+.add-row .field{flex:1;min-width:90px}
+.btn-add{height:40px;padding:0 14px;background:none;border:1.5px dashed var(--p);color:var(--p);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif}
+.btn-add:hover{background:var(--px)}
+
+/* PLATFORM ACCESS CARDS */
+.platform-block{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.platform-block.na{opacity:.55}
+.plat-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none}
+.plat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.plat-info{flex:1;min-width:0}
+.plat-name{font-size:13px;font-weight:700;color:var(--text)}
+.plat-hint{font-size:11.5px;color:var(--muted);margin-top:1px}
+.plat-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.na-toggle{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);cursor:pointer}
+.na-toggle input{width:14px;height:14px;accent-color:var(--p);cursor:pointer}
+.plat-chevron{font-size:13px;color:var(--mutedl);transition:transform .2s}
+.plat-head.open .plat-chevron{transform:rotate(180deg)}
+.plat-body{display:none;padding:0 14px 14px}
+.plat-body.open{display:block}
+
+/* ACCESS INSTRUCTIONS */
+.access-box{background:#fff;border:1.5px solid var(--borderl);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+.access-box-title{font-size:12px;font-weight:700;color:var(--p);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.steps-list{list-style:none;counter-reset:steps}
+.steps-list li{counter-increment:steps;display:flex;gap:10px;margin-bottom:8px;font-size:13px;line-height:1.5;color:var(--text)}
+.steps-list li::before{content:counter(steps);min-width:20px;height:20px;border-radius:50%;background:var(--p);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.email-pill{display:inline-flex;align-items:center;gap:5px;background:var(--pl);color:var(--pd);border:1px solid var(--borderl);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.email-pill:hover{background:var(--p);color:#fff}
+.copy-hint{font-size:10.5px;color:var(--mutedl);margin-top:-4px;margin-bottom:6px}
+.url-input{width:100%;height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;color:var(--text);outline:none;font-family:'Inter',sans-serif;background:#fafafa}
+.url-input:focus{border-color:var(--p)}
+.url-row{display:flex;gap:6px;align-items:center;margin-top:8px}
+.url-row input{flex:1;height:34px;padding:0 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;color:var(--text);outline:none;font-family:'Inter',sans-serif}
+.url-row input:focus{border-color:var(--p)}
+.copy-btn-sm{height:34px;padding:0 12px;background:var(--p);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.copy-btn-sm:hover{background:var(--pd)}
+.done-check{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.done-check input{width:15px;height:15px;accent-color:var(--ok);cursor:pointer}
+.done-check.checked{color:var(--ok);font-weight:600}
+
+/* STATUS PILL */
+.status-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.status-pending{background:var(--warnbg);color:var(--warn);border:1px solid var(--warnb)}
+.status-done{background:var(--okbg);color:var(--ok);border:1px solid var(--okb)}
+
+/* DOMAIN */
+.domain-add-row{display:flex;gap:7px;margin-bottom:9px}
+.domain-add-row input{flex:1;height:40px;padding:0 12px;font-size:14px;border:1.5px solid var(--border);border-radius:10px;outline:none;font-family:'Inter',sans-serif;color:var(--text)}
+.domain-add-row input:focus{border-color:var(--p)}
+.domain-btn{height:40px;padding:0 16px;background:var(--p);color:#fff;border:none;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.domain-btn:hover{background:var(--pd)}
+.domain-btn:disabled{opacity:.5;cursor:default}
+.domain-card{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 13px;margin-bottom:9px}
+.domain-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.domain-name{font-size:14px;font-weight:700}
+.domain-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:12px;color:var(--muted)}
+.domain-meta strong{color:var(--text);font-weight:600}
+.ns-tag{display:inline-block;background:var(--pl);color:var(--pd);border-radius:20px;padding:2px 9px;font-size:10.5px;font-weight:700;margin:2px 2px 0 0}
+.loading-pulse{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* BUTTONS */
+.btn-primary{background:var(--p);color:#fff;border:none;padding:11px 24px;border-radius:30px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:.15s}
+.btn-primary:hover{background:var(--pd)}
+.btn-sec{background:none;border:1.5px solid var(--border);color:var(--muted);padding:11px 18px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:.15s}
+.btn-sec:hover{border-color:var(--p);color:var(--p);background:var(--px)}
+.footer{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;padding-top:1.5rem;border-top:1.5px solid var(--borderl)}
+
+/* PIN GATE */
+.pin-wrap{max-width:420px;margin:4rem auto;padding:0 1rem}
+.pin-card{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:2.5rem 2rem;text-align:center;box-shadow:0 4px 24px rgba(124,58,237,.08)}
+.pin-logo{margin-bottom:1.5rem}
+.pin-card h2{font-size:20px;font-weight:800;margin-bottom:8px}
+.pin-card p{font-size:14px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
+.pin-input{width:100%;height:52px;text-align:center;font-size:28px;letter-spacing:10px;border:2px solid var(--border);border-radius:12px;outline:none;font-family:'Inter',sans-serif;color:var(--text);font-weight:700;margin-bottom:12px;transition:.15s}
+.pin-input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.pin-error{color:var(--err);font-size:13px;margin-bottom:10px;display:none}
+
+/* THANK YOU */
+.ty-wrap{max-width:480px;margin:4rem auto;padding:0 1rem;text-align:center}
+.ty-icon{font-size:56px;margin-bottom:1rem;display:block}
+.ty-card{background:#fff;border:1.5px solid var(--okb);border-radius:20px;padding:2.5rem 2rem;box-shadow:0 4px 24px rgba(5,150,105,.08)}
+.ty-card h2{font-size:22px;font-weight:800;color:var(--ok);margin-bottom:10px}
+.ty-card p{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* EXPIRED */
+.exp-wrap{max-width:420px;margin:4rem auto;padding:0 1rem;text-align:center}
+.exp-card{background:#fff;border:1.5px solid var(--errb);border-radius:20px;padding:2.5rem 2rem}
+.exp-card h2{font-size:20px;font-weight:800;color:var(--err);margin-bottom:8px}
+.exp-card p{font-size:14px;color:var(--muted);line-height:1.6}
+
+/* SAVING */
+.saving-bar{position:fixed;top:62px;right:12px;background:var(--p);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;display:none;z-index:100;box-shadow:0 4px 12px rgba(124,58,237,.3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--navy);color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:600;display:none;align-items:center;gap:8px;z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.2)}
+.toast.show{display:flex}
+.toast.ok{background:var(--ok)}
+.toast.err{background:var(--err)}
+
+@media(max-width:560px){.fg2{grid-template-columns:1fr}.card-body{padding:1.25rem}.nav{padding:0 1rem}.wrap{padding:1rem .75rem 3rem}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="https://rankon.com.au" target="_blank">
+    <img src="/rankon-logo.png" alt="Rankon" style="height:34px;width:auto;max-width:140px;object-fit:contain">
+  </a>
+  <div class="nav-right" id="nav-business-name"></div>
+</nav>
+
+<div id="saving-bar" class="saving-bar">Saving…</div>
+<div id="toast" class="toast"></div>
+
+<!-- PIN GATE -->
+<div id="view-pin" style="display:none">
+  <div class="pin-wrap">
+    <div class="pin-card">
+      <div class="pin-logo">
+        <img src="/rankon-logo.png" alt="Rankon" style="height:48px;width:auto;max-width:160px;object-fit:contain">
+      </div>
+      <h2>Enter your PIN</h2>
+      <p>Your onboarding link is PIN-protected. Enter the 4-digit PIN sent to you by your Rankon account manager.</p>
+      <input class="pin-input" id="pin-input" type="tel" maxlength="4" placeholder="••••" autocomplete="off">
+      <div class="pin-error" id="pin-error">Incorrect PIN. Please try again.</div>
+      <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitPin()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPIRED -->
+<div id="view-expired" style="display:none">
+  <div class="exp-wrap">
+    <div class="exp-card">
+      <span style="font-size:48px;display:block;margin-bottom:1rem">⏰</span>
+      <h2>Link expired</h2>
+      <p>This onboarding link has expired. Please contact your Rankon account manager to get a new link sent to you.</p>
+      <a href="https://rankon.com.au/contact" style="display:inline-block;margin-top:1.5rem;color:var(--p);font-weight:600;font-size:14px">Contact Rankon →</a>
+    </div>
+  </div>
+</div>
+
+<!-- THANK YOU -->
+<div id="view-thankyou" style="display:none">
+  <div class="ty-wrap">
+    <div class="ty-card">
+      <span class="ty-icon">🎉</span>
+      <h2>You're all done!</h2>
+      <p>Thank you for completing your onboarding. Your Rankon account manager has been notified and will be in touch within 1 business day to get your campaigns underway.</p>
+      <p style="margin-top:1rem">In the meantime, feel free to reach out at <strong id="ty-email" style="color:var(--p)"></strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN WIZARD -->
+<div id="view-wizard" style="display:none">
+  <div class="wrap">
+    <div class="card">
+      <div class="card-head">
+        <h1 id="wiz-biz-name">Welcome</h1>
+        <p>Complete your onboarding below — your progress saves automatically.</p>
+      </div>
+      <div class="steps" id="step-tabs">
+        <div class="step-tab active" id="stab1"><div class="step-n" id="sn1">1</div><div class="step-label">Your details</div></div>
+        <div class="step-tab" id="stab2"><div class="step-n" id="sn2">2</div><div class="step-label">Access &amp; platforms</div></div>
+        <div class="step-tab" id="stab3"><div class="step-n" id="sn3">3</div><div class="step-label">Domains</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Business details -->
+    <div id="ws1">
+      <div class="card">
+        <div class="card-body">
+          <div class="sec">Business information</div>
+          <div class="fg fg2">
+            <div class="field"><label>Business name <span class="req">*</span></label><input id="bizName" placeholder="Acme Pty Ltd" oninput="autoSave()"></div>
+            <div class="field"><label>ABN</label><input id="abn" placeholder="12 345 678 901" maxlength="14" oninput="autoSave()"></div>
+            <div class="field"><label>Billing email <span class="req">*</span></label><input id="billingEmail" type="email" placeholder="accounts@business.com.au" oninput="autoSave()"></div>
+            <div class="field"><label>Industry</label>
+              <select id="industry" onchange="autoSave()">
+                <option value="">Select…</option>
+                <option>Restaurant / Hospitality</option><option>Retail / E-commerce</option>
+                <option>Jewellery / Fashion</option><option>Automotive / Trailers</option>
+                <option>Commercial Property</option><option>Professional Services</option>
+                <option>Health / Medical</option><option>Construction / Trade</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="sec">Your contact details</div>
+          <div class="fg fg2">
+            <div class="field"><label>Your name <span class="req">*</span></label><input id="contactName" placeholder="Full name" oninput="autoSave()"></div>
+            <div class="field"><label>Phone <span class="req">*</span></label><input id="phone" type="tel" placeholder="04xx xxx xxx" oninput="autoSave()"></div>
+            <div class="field"><label>Your email</label><input id="contactEmail" type="email" placeholder="you@business.com.au" oninput="autoSave()"></div>
+            <div class="field"><label>Your role</label><input id="role" placeholder="Owner, Marketing Manager…" oninput="autoSave()"></div>
+          </div>
+          <div class="sec">Business address(es)</div>
+          <div id="addrList"></div>
+          <div class="add-row" style="margin-bottom:1.25rem">
+            <div class="field"><label>Street</label><input id="addrStreet" placeholder="123 Example St"></div>
+            <div class="field"><label>Suburb</label><input id="addrSuburb" placeholder="Melbourne"></div>
+            <div class="field" style="max-width:70px"><label>State</label><input id="addrState" placeholder="VIC" maxlength="3"></div>
+            <div class="field" style="max-width:80px"><label>Postcode</label><input id="addrPC" placeholder="3000" maxlength="4"></div>
+            <button class="btn-add" onclick="addAddress()">+ Add</button>
+          </div>
+          <div class="sec">Additional notes</div>
+          <div class="field" style="margin-bottom:.5rem">
+            <textarea id="notes" rows="3" placeholder="Anything else your account manager should know…" oninput="autoSave()"></textarea>
+          </div>
+          <div class="footer">
+            <span style="font-size:12px;color:var(--muted)"><span class="req">*</span> required</span>
+            <button class="btn-primary" onclick="nextStep(1)">Next: platforms &amp; access →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Platforms + Access instructions -->
+    <div id="ws2" style="display:none">
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-body" style="padding:1.25rem 1.75rem">
+          <p style="font-size:13.5px;color:var(--muted);line-height:1.65">For each platform below, we need you to grant <strong style="color:var(--text)">Rankon access</strong> so we can manage your campaigns. Click each platform to see step-by-step instructions. Tick "Done" once you've completed the steps, or tick "Not applicable" if you don't use that platform.</p>
+        </div>
+      </div>
+
+      <!-- Platforms injected by JS -->
+      <div id="platform-blocks"></div>
+
+      <div class="footer" style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1.25rem 1.75rem;margin-top:.5rem">
+        <button class="btn-sec" onclick="goStep(1)">← Back</button>
+        <button class="btn-primary" onclick="nextStep(2)">Next: domains →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Domains -->
+    <div id="ws3" style="display:none">
+      <div class="card">
+        <div class="card-body">
+          <div class="sec">Domain names</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6">Add all domains your business owns. We'll automatically look up the nameservers and hosting details.</p>
+          <div id="domainCards"></div>
+          <div class="domain-add-row">
+            <input id="domainInput" placeholder="example.com.au" onkeydown="if(event.key==='Enter')addDomain()">
+            <button class="domain-btn" id="whoisBtn" onclick="addDomain()">+ Add domain</button>
+          </div>
+          <p style="font-size:12px;color:var(--mutedl);margin-top:6px">Tip: include your main site domain and any redirects you own.</p>
+          <div class="footer">
+            <button class="btn-sec" onclick="goStep(2)">← Back</button>
+            <button class="btn-primary" onclick="submitOnboarding()">Submit onboarding ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const token = location.pathname.split('/')[2];
+let clientData = null;
+let settings = null;
+let addresses = [];
+let domains = [];
+let platformStatus = {};
+let saveTimer = null;
+let _step = 1;
+
+// ── PLATFORM DEFINITIONS ──────────────────────────────────
+function getPlatforms(s) {
+  const pe = s?.platformEmails || {};
+  return [
+    {
+      id: 'facebook', name: 'Facebook Page', icon: '📘', color: '#1877F2',
+      hint: 'Business page access',
+      accessEmail: pe.facebook,
+      field: 'facebook', fieldLabel: 'Facebook Page URL',
+      fieldPlaceholder: 'https://facebook.com/yourbusiness',
+      instructions: [
+        `Go to your <strong>Facebook Page</strong> (not your personal profile)`,
+        `Click <strong>Settings</strong> in the left sidebar, then <strong>Page Access</strong>`,
+        `Under <em>People with Facebook access</em>, click <strong>Add New</strong>`,
+        `Search for <span class="email-pill" onclick="copyEmail('${pe.facebook}')">${pe.facebook} 📋</span>`,
+        `Grant <strong>Full control</strong> and click <strong>Give Access</strong>`,
+        `Paste your Facebook Page URL in the field below`
+      ]
+    },
+    {
+      id: 'instagram', name: 'Instagram Business', icon: '📸', color: '#E1306C',
+      hint: 'Connected to Facebook Page',
+      accessEmail: pe.instagram,
+      field: 'instagram', fieldLabel: 'Instagram Profile URL or @handle',
+      fieldPlaceholder: '@yourbusiness or https://instagram.com/yourbusiness',
+      instructions: [
+        `Your Instagram must be a <strong>Professional (Business) account</strong> linked to your Facebook Page`,
+        `Go to your Facebook Page → <strong>Settings</strong> → <strong>Linked Accounts</strong> and confirm Instagram is connected`,
+        `Once Rankon has Facebook Page access (see above), Instagram access is automatic`,
+        `Paste your Instagram handle or profile URL below`
+      ]
+    },
+    {
+      id: 'gbp', name: 'Google Business Profile', icon: '🗺', color: '#4285F4',
+      hint: 'Google Maps / local listing',
+      accessEmail: pe.gbp,
+      field: 'googleBusinessProfile', fieldLabel: 'Google Business Profile URL',
+      fieldPlaceholder: 'https://business.google.com/… or your Maps listing URL',
+      instructions: [
+        `Go to <strong>business.google.com</strong> and sign in`,
+        `Select your business profile, then click <strong>Settings</strong> → <strong>Managers</strong>`,
+        `Click <strong>Add</strong>, enter <span class="email-pill" onclick="copyEmail('${pe.gbp}')">${pe.gbp} 📋</span>`,
+        `Set role to <strong>Manager</strong> and click <strong>Invite</strong>`,
+        `Paste your Google Maps or Business Profile URL below`
+      ]
+    },
+    {
+      id: 'ga4', name: 'Google Analytics (GA4)', icon: '📊', color: '#E37400',
+      hint: 'Website traffic analytics',
+      accessEmail: pe.google,
+      field: 'analyticsGA4', fieldLabel: 'GA4 Property ID',
+      fieldPlaceholder: 'G-XXXXXXXXXX or Measurement ID',
+      instructions: [
+        `Go to <strong>analytics.google.com</strong> and select your property`,
+        `Click <strong>Admin</strong> (gear icon, bottom left)`,
+        `Under <em>Property</em>, click <strong>Property Access Management</strong>`,
+        `Click <strong>+</strong> (Add users), enter <span class="email-pill" onclick="copyEmail('${pe.google}')">${pe.google} 📋</span>`,
+        `Select role <strong>Editor</strong>, then click <strong>Add</strong>`,
+        `Your Property ID (G-XXXXXXXX) is shown in Admin → Property Settings — paste it below`
+      ]
+    },
+    {
+      id: 'gads', name: 'Google Ads', icon: '📢', color: '#34A853',
+      hint: 'Paid search advertising',
+      accessEmail: pe.googleAds,
+      field: 'adsCID', fieldLabel: 'Google Ads Customer ID',
+      fieldPlaceholder: 'xxx-xxx-xxxx',
+      instructions: [
+        `Sign in to <strong>ads.google.com</strong>`,
+        `Click the <strong>Tools &amp; Settings</strong> icon (wrench) → <strong>Access and security</strong>`,
+        `Click <strong>+ Add user</strong>, enter <span class="email-pill" onclick="copyEmail('${pe.googleAds}')">${pe.googleAds} 📋</span>`,
+        `Set access level to <strong>Admin</strong>, then click <strong>Send invitation</strong>`,
+        `Your Customer ID (xxx-xxx-xxxx) is shown in the top-right corner — paste it below`
+      ]
+    },
+    {
+      id: 'gsc', name: 'Google Search Console', icon: '🔍', color: '#EA4335',
+      hint: 'SEO & indexing data',
+      accessEmail: pe.gsc,
+      field: 'searchConsole', fieldLabel: 'Search Console Property URL',
+      fieldPlaceholder: 'https://yourdomain.com.au',
+      instructions: [
+        `Go to <strong>search.google.com/search-console</strong>`,
+        `Select your property (website)`,
+        `Click <strong>Settings</strong> (gear icon, left sidebar) → <strong>Users and permissions</strong>`,
+        `Click <strong>Add User</strong>, enter <span class="email-pill" onclick="copyEmail('${pe.gsc}')">${pe.gsc} 📋</span>`,
+        `Set permission to <strong>Full</strong>, click <strong>Add</strong>`,
+        `Paste your verified website URL below`
+      ]
+    },
+    {
+      id: 'msads', name: 'Microsoft / Bing Ads', icon: '🪟', color: '#0078D4',
+      hint: 'Bing paid search',
+      accessEmail: pe.microsoft,
+      field: 'microsoftAds', fieldLabel: 'Microsoft Ads Account ID',
+      fieldPlaceholder: 'Account ID (numeric)',
+      instructions: [
+        `Sign in to <strong>ads.microsoft.com</strong>`,
+        `Click <strong>Tools</strong> in the top menu → <strong>Account access</strong>`,
+        `Click <strong>Invite user</strong>, enter <span class="email-pill" onclick="copyEmail('${pe.microsoft}')">${pe.microsoft} 📋</span>`,
+        `Set role to <strong>Super Admin</strong>, click <strong>Send</strong>`,
+        `Your Account ID is shown under <strong>Tools → Accounts Summary</strong> — paste it below`
+      ]
+    },
+    {
+      id: 'metaads', name: 'Meta Ads Manager', icon: '📣', color: '#1877F2',
+      hint: 'Facebook & Instagram ads',
+      accessEmail: pe.metaAds,
+      field: 'metaAds', fieldLabel: 'Meta Ad Account ID',
+      fieldPlaceholder: 'act_XXXXXXXXXX',
+      instructions: [
+        `Go to <strong>business.facebook.com</strong> → <strong>Business Settings</strong>`,
+        `Click <strong>Accounts</strong> → <strong>Ad Accounts</strong>, select your ad account`,
+        `Click <strong>Add People</strong>, enter <span class="email-pill" onclick="copyEmail('${pe.metaAds}')">${pe.metaAds} 📋</span>`,
+        `Grant <strong>Admin access</strong>, click <strong>Assign</strong>`,
+        `Your Ad Account ID (act_XXXXXX) is shown in Ads Manager → Account Overview`
+      ]
+    },
+    {
+      id: 'tiktok', name: 'TikTok Business', icon: '🎵', color: '#010101',
+      hint: 'TikTok Ads & profile',
+      accessEmail: pe.tiktok,
+      field: 'tiktok', fieldLabel: 'TikTok Profile URL or @handle',
+      fieldPlaceholder: '@yourbusiness',
+      instructions: [
+        `Go to <strong>business.tiktok.com</strong> and sign into your Business Center`,
+        `Click <strong>Members</strong> in the left sidebar → <strong>Invite member</strong>`,
+        `Enter <span class="email-pill" onclick="copyEmail('${pe.tiktok}')">${pe.tiktok} 📋</span>`,
+        `Set role to <strong>Admin</strong> and click <strong>Confirm</strong>`,
+        `Also share access to your TikTok Ads Manager account if you have one`,
+        `Paste your TikTok profile URL or @handle below`
+      ]
+    },
+    {
+      id: 'linkedin', name: 'LinkedIn Company Page', icon: '💼', color: '#0A66C2',
+      hint: 'LinkedIn page management',
+      accessEmail: pe.linkedin,
+      field: 'linkedin', fieldLabel: 'LinkedIn Company Page URL',
+      fieldPlaceholder: 'https://linkedin.com/company/yourbusiness',
+      instructions: [
+        `Go to your <strong>LinkedIn Company Page</strong>`,
+        `Click <strong>Admin tools</strong> (top right) → <strong>Manage admins</strong>`,
+        `Click <strong>Add admin</strong>`,
+        `Search for <span class="email-pill" onclick="copyEmail('${pe.linkedin}')">${pe.linkedin} 📋</span>`,
+        `Select <strong>Super admin</strong> role and click <strong>Save</strong>`,
+        `Paste your Company Page URL below`
+      ]
+    }
+  ];
+}
+
+// ── INIT ──────────────────────────────────────────────────
+async function init() {
+  try {
+    settings = await fetch('/api/public-settings').then(r => r.json());
+  } catch(e) { settings = {}; }
+
+  if (settings.pinRequired) {
+    show('pin');
+  } else {
+    await loadClient('');
+  }
+}
+
+async function submitPin() {
+  const pin = document.getElementById('pin-input').value.trim();
+  await loadClient(pin);
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('view-pin').style.display !== 'none') submitPin();
+});
+
+async function loadClient(pin) {
+  try {
+    const r = await fetch(`/api/portal/${token}/access`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ pin })
+    });
+    if (r.status === 410) { show('expired'); return; }
+    if (r.status === 401) {
+      document.getElementById('pin-error').style.display = 'block';
+      document.getElementById('pin-input').value = '';
+      return;
+    }
+    if (!r.ok) { show('expired'); return; }
+    clientData = await r.json();
+    if (clientData.completed) { show('thankyou'); return; }
+    populateForm();
+    show('wizard');
+  } catch(e) { show('expired'); }
+}
+
+function show(v) {
+  ['pin','expired','thankyou','wizard'].forEach(x => {
+    document.getElementById('view-'+x).style.display = x === v ? 'block' : 'none';
+  });
+  if (v === 'thankyou') {
+    document.getElementById('ty-email').textContent = settings?.agency?.email || 'hello@rankon.com.au';
+  }
+}
+
+function populateForm() {
+  const c = clientData;
+  const b = c.business || {};
+  const ct = c.contact || {};
+  sv('bizName', b.name); sv('abn', b.abn); sv('billingEmail', b.billingEmail);
+  sv('industry', b.industry); sv('notes', b.notes);
+  sv('contactName', ct.name); sv('phone', ct.phone); sv('contactEmail', ct.email); sv('role', ct.role);
+  addresses = b.addresses || [];
+  domains = c.domains || [];
+  platformStatus = c.platformStatus || {};
+  const name = b.name || 'Welcome';
+  document.getElementById('wiz-biz-name').textContent = name;
+  document.getElementById('nav-business-name').textContent = name;
+  renderAddresses();
+  renderPlatforms();
+  renderDomains();
+  goStep(c.step || 1);
+}
+
+// ── STEPS ─────────────────────────────────────────────────
+function goStep(n) {
+  _step = n;
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('ws'+i); if(el) el.style.display = i===n?'block':'none';
+    const tab = document.getElementById('stab'+i);
+    const sn = document.getElementById('sn'+i);
+    if(!tab) return;
+    tab.classList.remove('active','done');
+    if(i===n) tab.classList.add('active');
+    else if(i<n) { tab.classList.add('done'); sn.textContent='✓'; }
+    else sn.textContent = i;
+  });
+  autoSave();
+}
+
+function nextStep(from) {
+  if (from===1) {
+    if (!gv('bizName')||!gv('billingEmail')||!gv('contactName')||!gv('phone')) {
+      toast('Please fill in all required fields','err'); return;
+    }
+  }
+  goStep(from+1);
+}
+
+// ── FORM HELPERS ──────────────────────────────────────────
+function sv(id,val){const el=document.getElementById(id);if(el)el.value=val||''}
+function gv(id){return document.getElementById(id)?.value?.trim()||''}
+
+function addAddress() {
+  const s=gv('addrStreet'),sub=gv('addrSuburb'),st=gv('addrState'),pc=gv('addrPC');
+  if(!s){toast('Enter a street address','err');return;}
+  addresses.push([s,sub,st,pc].filter(Boolean).join(', '));
+  renderAddresses();
+  ['addrStreet','addrSuburb','addrState','addrPC'].forEach(id=>document.getElementById(id).value='');
+  autoSave();
+}
+function removeAddr(i){addresses.splice(i,1);renderAddresses();autoSave()}
+function renderAddresses(){
+  document.getElementById('addrList').innerHTML=addresses.map((a,i)=>
+    `<div class="addr-chip"><span>📍 ${a}</span><button class="chip-del" onclick="removeAddr(${i})">×</button></div>`
+  ).join('');
+}
+
+// ── PLATFORMS ─────────────────────────────────────────────
+function renderPlatforms() {
+  const platforms = getPlatforms(settings);
+  const container = document.getElementById('platform-blocks');
+  container.innerHTML = platforms.map(p => {
+    const status = platformStatus[p.id] || {};
+    const isDone = status.done;
+    const isNA = status.na;
+    const fieldVal = getFieldVal(p.field);
+    return `
+    <div class="platform-block${isNA?' na':''}" id="plat-${p.id}">
+      <div class="plat-head" id="plat-head-${p.id}" onclick="togglePlat('${p.id}')">
+        <div class="plat-icon" style="background:${p.color}">${p.icon}</div>
+        <div class="plat-info">
+          <div class="plat-name">${p.name}</div>
+          <div class="plat-hint">${p.hint}</div>
+        </div>
+        <div class="plat-right">
+          ${isDone ? '<span class="status-pill status-done">✓ Done</span>' : isNA ? '<span class="status-pill" style="background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">N/A</span>' : '<span class="status-pill status-pending">Pending</span>'}
+          <label class="na-toggle" onclick="event.stopPropagation()">
+            <input type="checkbox" ${isNA?'checked':''} onchange="toggleNA('${p.id}',this.checked)"> N/A
+          </label>
+          <span class="plat-chevron">▾</span>
+        </div>
+      </div>
+      <div class="plat-body" id="plat-body-${p.id}">
+        <div class="access-box">
+          <div class="access-box-title">📋 How to give Rankon access</div>
+          <ol class="steps-list">
+            ${p.instructions.map(s=>`<li>${s}</li>`).join('')}
+          </ol>
+        </div>
+        <div class="field">
+          <label>${p.fieldLabel}</label>
+          <div class="url-row">
+            <input id="plat-input-${p.id}" type="text" placeholder="${p.fieldPlaceholder}" value="${fieldVal}" oninput="setPlatField('${p.id}','${p.field}',this.value)">
+          </div>
+        </div>
+        <label class="done-check${isDone?' checked':''}" id="done-check-${p.id}">
+          <input type="checkbox" ${isDone?'checked':''} onchange="toggleDone('${p.id}',this.checked)">
+          I've completed the access steps above
+        </label>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getFieldVal(field) {
+  if (!clientData) return '';
+  const maps = {
+    facebook: clientData.social?.facebook, instagram: clientData.social?.instagram,
+    tiktok: clientData.social?.tiktok, linkedin: clientData.social?.linkedin,
+    googleBusinessProfile: clientData.google?.businessProfile,
+    analyticsGA4: clientData.google?.analyticsGA4, adsCID: clientData.google?.adsCID,
+    searchConsole: clientData.google?.searchConsole,
+    microsoftAds: clientData.advertising?.microsoftAds, metaAds: clientData.advertising?.metaAds
+  };
+  return maps[field] || '';
+}
+
+function setPlatField(platId, field, value) {
+  // Map field to the right object
+  const socialFields = ['facebook','instagram','tiktok','linkedin'];
+  const googleFields = ['googleBusinessProfile','analyticsGA4','adsCID','searchConsole'];
+  if (!clientData.social) clientData.social = {};
+  if (!clientData.google) clientData.google = {};
+  if (!clientData.advertising) clientData.advertising = {};
+  if (socialFields.includes(field)) clientData.social[field] = value;
+  else if (googleFields.includes(field)) clientData.google[field] = value;
+  else clientData.advertising[field] = value;
+  autoSave();
+}
+
+function togglePlat(id) {
+  const head = document.getElementById('plat-head-'+id);
+  const body = document.getElementById('plat-body-'+id);
+  const isOpen = body.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.plat-body').forEach(b=>b.classList.remove('open'));
+  document.querySelectorAll('.plat-head').forEach(h=>h.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); head.classList.add('open'); }
+}
+
+function toggleNA(id, checked) {
+  if (!platformStatus[id]) platformStatus[id] = {};
+  platformStatus[id].na = checked;
+  if (checked) platformStatus[id].done = false;
+  document.getElementById('plat-'+id).classList.toggle('na', checked);
+  renderPlatformStatus(id);
+  autoSave();
+}
+
+function toggleDone(id, checked) {
+  if (!platformStatus[id]) platformStatus[id] = {};
+  platformStatus[id].done = checked;
+  const label = document.getElementById('done-check-'+id);
+  if (label) label.classList.toggle('checked', checked);
+  renderPlatformStatus(id);
+  autoSave();
+}
+
+function renderPlatformStatus(id) {
+  const status = platformStatus[id] || {};
+  const pill = document.querySelector(`#plat-head-${id} .status-pill`);
+  if (!pill) return;
+  if (status.done) { pill.className='status-pill status-done'; pill.textContent='✓ Done'; }
+  else if (status.na) { pill.className='status-pill'; pill.style.cssText='background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb'; pill.textContent='N/A'; }
+  else { pill.className='status-pill status-pending'; pill.style=''; pill.textContent='Pending'; }
+}
+
+function copyEmail(email) {
+  navigator.clipboard.writeText(email).then(()=>toast('Copied: '+email,'ok'));
+}
+
+// ── DOMAINS ───────────────────────────────────────────────
+async function addDomain() {
+  const input = document.getElementById('domainInput');
+  const raw = input.value.trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'').toLowerCase();
+  if (!raw) return;
+  input.value = '';
+  const btn = document.getElementById('whoisBtn');
+  btn.disabled = true; btn.textContent = '⏳ Looking up…';
+  const idx = domains.length;
+  domains.push({domain:raw,ns:[],registrar:'',expiry:'',hosting:'',loading:true});
+  renderDomains();
+  try {
+    const r = await fetch('/api/whois/'+encodeURIComponent(raw));
+    const data = await r.json();
+    domains[idx] = {domain:raw,...data,loading:false};
+  } catch(e) {
+    domains[idx] = {domain:raw,ns:[],registrar:'',expiry:'',hosting:'',loading:false,error:true};
+  }
+  btn.disabled=false; btn.textContent='+ Add domain';
+  renderDomains(); autoSave();
+}
+function removeDomain(i){domains.splice(i,1);renderDomains();autoSave()}
+function renderDomains() {
+  document.getElementById('domainCards').innerHTML = domains.map((d,i) => {
+    if (d.loading) return `<div class="domain-card"><div class="domain-card-head"><div class="domain-name">🌐 ${d.domain}</div></div><div style="font-size:12px;color:var(--muted)"><span class="loading-pulse">Looking up WHOIS data…</span></div></div>`;
+    if (d.error) return `<div class="domain-card"><div class="domain-card-head"><div class="domain-name">🌐 ${d.domain}</div><button class="chip-del" onclick="removeDomain(${i})">×</button></div><div style="font-size:12px;color:var(--err)">WHOIS lookup failed — saved without DNS details.</div></div>`;
+    const nsHtml = (d.ns||[]).map(n=>`<span class="ns-tag">${n}</span>`).join('');
+    return `<div class="domain-card">
+      <div class="domain-card-head"><div class="domain-name">🌐 ${d.domain}</div><button class="chip-del" onclick="removeDomain(${i})">×</button></div>
+      <div class="domain-meta">
+        ${d.registrar?`<div>Registrar: <strong>${d.registrar}</strong></div>`:''}
+        ${d.expiry?`<div>Expires: <strong>${d.expiry}</strong></div>`:''}
+        ${d.hosting?`<div>Hosting: <strong>${d.hosting}</strong></div>`:''}
+      </div>
+      ${d.ns?.length?`<div style="margin-top:7px;border-top:1px solid var(--borderl);padding-top:7px;font-size:12px;color:var(--muted)">Nameservers: ${nsHtml}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── SAVE ──────────────────────────────────────────────────
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveData,900)}
+async function saveData() {
+  if (!token) return;
+  const bar = document.getElementById('saving-bar'); bar.style.display='block';
+  const payload = {
+    step: _step,
+    business:{name:gv('bizName'),abn:gv('abn'),billingEmail:gv('billingEmail'),industry:gv('industry'),addresses,notes:gv('notes')},
+    contact:{name:gv('contactName'),phone:gv('phone'),email:gv('contactEmail'),role:gv('role')},
+    social: clientData?.social || {},
+    google: clientData?.google || {},
+    advertising: clientData?.advertising || {},
+    domains, platformStatus
+  };
+  try { await fetch(`/api/portal/${token}/access`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pin:''})}); } catch(e){}
+  try { await fetch(`/api/clients/${clientData.id}`, {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); } catch(e){}
+  setTimeout(()=>bar.style.display='none',700);
+}
+
+// ── SUBMIT ────────────────────────────────────────────────
+async function submitOnboarding() {
+  const payload = {
+    step: 3,
+    business:{name:gv('bizName'),abn:gv('abn'),billingEmail:gv('billingEmail'),industry:gv('industry'),addresses,notes:gv('notes')},
+    contact:{name:gv('contactName'),phone:gv('phone'),email:gv('contactEmail'),role:gv('role')},
+    social: clientData?.social || {},
+    google: clientData?.google || {},
+    advertising: clientData?.advertising || {},
+    domains, platformStatus
+  };
+  try {
+    await fetch(`/api/portal/${token}/submit`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    show('thankyou');
+  } catch(e) { toast('Submission failed — please try again','err'); }
+}
+
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');
+  setTimeout(()=>t.className='toast',2800);
+}
+
+init();
+</script>
+</body>
+</html>

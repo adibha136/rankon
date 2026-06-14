@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rankon — Client Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rk-purple:#7C3AED;
+  --rk-purple-dark:#6D28D9;
+  --rk-purple-light:#EDE9FE;
+  --rk-purple-mid:#8B5CF6;
+  --rk-purple-xlight:#F5F3FF;
+  --rk-navy:#0d0d1a;
+  --rk-white:#ffffff;
+  --rk-bg:#f8f7ff;
+  --rk-border:#e5e0f8;
+  --rk-border-light:#ede9fe;
+  --rk-text:#0d0d1a;
+  --rk-muted:#6b6b9a;
+  --rk-muted-light:#9898c0;
+  --rk-success:#059669;
+  --rk-success-bg:#ecfdf5;
+  --rk-danger:#dc2626;
+  --rk-danger-bg:#fef2f2;
+  --rk-warning:#d97706;
+}
+body{font-family:'Inter',sans-serif;background:var(--rk-bg);color:var(--rk-text);font-size:15px;line-height:1.5}
+
+/* ── NAV ── */
+.nav{background:var(--rk-white);border-bottom:1px solid var(--rk-border);padding:0 2.5rem;display:flex;align-items:center;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 1px 12px rgba(124,58,237,0.06)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-mark{width:36px;height:36px}
+.nav-logo-text{font-size:18px;font-weight:800;color:var(--rk-navy);letter-spacing:-0.5px}
+.nav-logo-text span{color:var(--rk-purple)}
+.nav-divider{width:1px;height:22px;background:var(--rk-border);margin:0 16px}
+.nav-tag{font-size:12px;color:var(--rk-muted);font-weight:500;background:var(--rk-purple-xlight);border:1px solid var(--rk-border-light);padding:3px 10px;border-radius:20px;color:var(--rk-purple)}
+.nav-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+.nav-link{font-size:14px;color:var(--rk-muted);font-weight:500;background:none;border:none;cursor:pointer;padding:8px 12px;border-radius:8px}
+.nav-link:hover{color:var(--rk-purple);background:var(--rk-purple-xlight)}
+.nav-cta{background:var(--rk-purple);color:#fff;border:none;padding:9px 20px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Inter',sans-serif}
+.nav-cta:hover{background:var(--rk-purple-dark)}
+
+/* ── PAGES ── */
+.page{display:none;min-height:calc(100vh - 64px)}
+.page.active{display:block}
+
+/* ── DASHBOARD HERO ── */
+.dash-hero{background:linear-gradient(135deg,var(--rk-navy) 0%,#1e0a4a 100%);padding:3rem 2.5rem 2.5rem;color:#fff;position:relative;overflow:hidden}
+.dash-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(124,58,237,0.15);pointer-events:none}
+.dash-hero::after{content:'';position:absolute;bottom:-40px;left:30%;width:200px;height:200px;border-radius:50%;background:rgba(139,92,246,0.1);pointer-events:none}
+.dash-hero h1{font-size:26px;font-weight:800;margin-bottom:6px;letter-spacing:-0.5px}
+.dash-hero p{font-size:14px;color:rgba(255,255,255,0.55);font-weight:400}
+.dash-hero-pills{display:flex;gap:8px;margin-top:1.25rem;flex-wrap:wrap}
+.hero-pill{border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:500}
+
+/* ── STATS BAR ── */
+.dash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));background:var(--rk-white);border-bottom:1px solid var(--rk-border)}
+.stat{padding:1.25rem 1.5rem;text-align:center;border-right:1px solid var(--rk-border)}
+.stat:last-child{border-right:none}
+.stat-n{font-size:28px;font-weight:800;color:var(--rk-purple);letter-spacing:-1px}
+.stat-l{font-size:12px;color:var(--rk-muted);margin-top:2px;font-weight:500}
+
+/* ── TOOLBAR ── */
+.dash-toolbar{padding:1rem 2.5rem;display:flex;align-items:center;gap:10px;background:var(--rk-white);border-bottom:1px solid var(--rk-border)}
+.dash-toolbar input{height:38px;padding:0 14px;border:1.5px solid var(--rk-border);border-radius:30px;font-size:13px;width:240px;outline:none;font-family:'Inter',sans-serif;color:var(--rk-text);background:var(--rk-bg)}
+.dash-toolbar input:focus{border-color:var(--rk-purple);background:#fff}
+.dash-toolbar input::placeholder{color:var(--rk-muted-light)}
+
+/* ── TABLE ── */
+.dash-table-wrap{padding:2rem 2.5rem}
+table{width:100%;border-collapse:collapse;background:var(--rk-white);border-radius:14px;overflow:hidden;border:1.5px solid var(--rk-border);font-size:13px;box-shadow:0 2px 16px rgba(124,58,237,0.05)}
+thead{background:var(--rk-purple-xlight)}
+th{text-align:left;padding:11px 16px;font-weight:700;color:var(--rk-purple);font-size:11px;text-transform:uppercase;letter-spacing:0.6px;border-bottom:1.5px solid var(--rk-border)}
+td{padding:13px 16px;border-bottom:1px solid var(--rk-border-light);vertical-align:middle;color:var(--rk-text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--rk-purple-xlight)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-step1{background:#fef9ec;color:#b45309;border:1px solid #fde68a}
+.badge-step2{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.badge-done{background:var(--rk-success-bg);color:var(--rk-success);border:1px solid #a7f3d0}
+.tbl-actions{display:flex;gap:6px}
+.tbl-btn{padding:5px 12px;border-radius:20px;border:1.5px solid var(--rk-border);font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:var(--rk-muted);font-family:'Inter',sans-serif;transition:all .15s}
+.tbl-btn:hover{border-color:var(--rk-purple);color:var(--rk-purple);background:var(--rk-purple-xlight)}
+.tbl-btn.danger{color:var(--rk-danger);border-color:#fecaca}
+.tbl-btn.danger:hover{background:var(--rk-danger-bg)}
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--rk-muted)}
+.empty-icon{font-size:48px;margin-bottom:16px;display:block;opacity:.4}
+
+/* ── WIZARD WRAP ── */
+.wizard-wrap{max-width:760px;margin:2rem auto;padding:0 1rem 4rem}
+.wiz-card{background:var(--rk-white);border-radius:20px;overflow:hidden;border:1.5px solid var(--rk-border);box-shadow:0 4px 32px rgba(124,58,237,0.08)}
+
+/* ── WIZARD HEADER ── */
+.wiz-head{background:linear-gradient(135deg,var(--rk-navy) 0%,#1e0a4a 100%);padding:2rem 2rem 1.5rem;position:relative;overflow:hidden}
+.wiz-head::after{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:rgba(124,58,237,0.2);pointer-events:none}
+.wiz-title{font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.3px;margin-bottom:4px}
+.wiz-sub{font-size:13px;color:rgba(255,255,255,0.5);font-weight:400}
+.wiz-head-logo{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.wiz-head-logo span{font-size:14px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:-0.2px}
+.wiz-head-logo span em{color:var(--rk-purple-mid);font-style:normal}
+
+/* ── STEP TABS ── */
+.wiz-steps{display:flex;background:#fff;border-bottom:1.5px solid var(--rk-border);padding:0}
+.wiz-step{flex:1;display:flex;align-items:center;gap:10px;cursor:pointer;padding:1rem 1.25rem;border-bottom:3px solid transparent;transition:all .2s}
+.wiz-step:hover{background:var(--rk-purple-xlight)}
+.wiz-step.active{border-bottom-color:var(--rk-purple);background:var(--rk-purple-xlight)}
+.wiz-step-n{width:26px;height:26px;border-radius:50%;background:var(--rk-border);color:var(--rk-muted);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.wiz-step.active .wiz-step-n{background:var(--rk-purple);color:#fff}
+.wiz-step.done .wiz-step-n{background:var(--rk-success);color:#fff}
+.wiz-step-label{font-size:13px;font-weight:600;color:var(--rk-muted)}
+.wiz-step.active .wiz-step-label{color:var(--rk-purple)}
+.wiz-step.done .wiz-step-label{color:var(--rk-success)}
+
+/* ── WIZARD BODY ── */
+.wiz-body{padding:2rem}
+
+/* ── SECTION TITLES ── */
+.sec-title{font-size:11px;font-weight:700;color:var(--rk-purple);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:.875rem;padding-bottom:8px;border-bottom:1.5px solid var(--rk-border-light);display:flex;align-items:center;gap:6px}
+
+/* ── FORM ── */
+.f-grid{display:grid;gap:14px;margin-bottom:1.25rem}
+.f-grid-2{grid-template-columns:1fr 1fr}
+.f-grid-3{grid-template-columns:2fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11.5px;font-weight:700;color:var(--rk-muted);text-transform:uppercase;letter-spacing:0.5px}
+.field label .req{color:var(--rk-purple)}
+.field input,.field select,.field textarea{height:40px;padding:0 13px;border:1.5px solid var(--rk-border);border-radius:10px;font-size:14px;color:var(--rk-text);outline:none;background:#fff;width:100%;transition:border .15s;font-family:'Inter',sans-serif}
+.field textarea{height:auto;padding:10px 13px;resize:none}
+.field input::placeholder,.field textarea::placeholder{color:var(--rk-muted-light)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--rk-purple);box-shadow:0 0 0 3px rgba(124,58,237,0.1)}
+
+/* ── ADDRESS CHIPS ── */
+.addr-chip{background:var(--rk-purple-xlight);border:1.5px solid var(--rk-border-light);border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:8px;color:var(--rk-text)}
+.chip-del{background:none;border:none;color:var(--rk-muted-light);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;border-radius:50%;transition:all .15s}
+.chip-del:hover{color:var(--rk-danger);background:var(--rk-danger-bg)}
+.add-row{display:flex;gap:8px;align-items:flex-end}
+.add-row .field{flex:1}
+.btn-add{height:40px;padding:0 16px;background:none;border:1.5px dashed var(--rk-purple);color:var(--rk-purple);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;transition:all .15s}
+.btn-add:hover{background:var(--rk-purple-xlight)}
+
+/* ── PLATFORM CARDS ── */
+.platform-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.platform-card{background:var(--rk-bg);border:1.5px solid var(--rk-border);border-radius:12px;padding:14px;transition:border .15s}
+.platform-card:focus-within{border-color:var(--rk-purple);background:var(--rk-purple-xlight)}
+.platform-card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.platform-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.platform-name{font-size:13px;font-weight:700;color:var(--rk-text)}
+.platform-card input{height:36px;padding:0 10px;font-size:13px;border:1.5px solid var(--rk-border);border-radius:8px;background:#fff;color:var(--rk-text);outline:none;width:100%;font-family:'Inter',sans-serif}
+.platform-card input:focus{border-color:var(--rk-purple);box-shadow:0 0 0 3px rgba(124,58,237,0.1)}
+.platform-card input::placeholder{color:var(--rk-muted-light)}
+
+/* ── DOMAIN ── */
+.domain-add-row{display:flex;gap:8px;margin-bottom:10px}
+.domain-add-row input{flex:1;height:40px;padding:0 13px;font-size:14px;border:1.5px solid var(--rk-border);border-radius:10px;outline:none;font-family:'Inter',sans-serif;color:var(--rk-text)}
+.domain-add-row input:focus{border-color:var(--rk-purple);box-shadow:0 0 0 3px rgba(124,58,237,0.1)}
+.domain-add-row input::placeholder{color:var(--rk-muted-light)}
+.domain-lookup-btn{height:40px;padding:0 18px;background:var(--rk-purple);color:#fff;border:none;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:background .15s}
+.domain-lookup-btn:hover{background:var(--rk-purple-dark)}
+.domain-lookup-btn:disabled{opacity:.5;cursor:default}
+.domain-card{background:var(--rk-bg);border:1.5px solid var(--rk-border);border-radius:12px;padding:14px;margin-bottom:10px}
+.domain-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.domain-name{font-size:14px;font-weight:700;color:var(--rk-text)}
+.domain-meta{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;font-size:12.5px;color:var(--rk-muted)}
+.domain-meta strong{color:var(--rk-text);font-weight:600}
+.domain-ns{font-size:12px;color:var(--rk-muted);margin-top:8px;border-top:1px solid var(--rk-border-light);padding-top:8px}
+.domain-ns strong{color:var(--rk-purple);font-weight:600}
+.ns-tag{display:inline-block;background:var(--rk-purple-light);color:var(--rk-purple);border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600;margin:2px 3px 0 0}
+.loading-dot{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── EXPORT ── */
+.export-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.25rem}
+.exp-btn{padding:10px 20px;border-radius:30px;border:none;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:all .15s}
+.exp-btn.primary{background:var(--rk-purple);color:#fff}
+.exp-btn.primary:hover{background:var(--rk-purple-dark)}
+.exp-btn.dark{background:var(--rk-navy);color:#fff}
+.exp-btn.dark:hover{background:#2d1a5a}
+.exp-btn.green{background:var(--rk-success);color:#fff}
+.export-pre-wrap{background:var(--rk-navy);border-radius:12px;padding:1.25rem;border:1.5px solid #2a1a4a}
+.export-pre{color:#a78bfa;font-size:11.5px;font-family:'Fira Mono','Courier New',monospace;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow-y:auto;line-height:1.65}
+.vault-note-wrap{background:#0f0a1e;border-radius:12px;padding:1.25rem;margin-top:1rem;border:1.5px solid #2a1a4a}
+.vault-note{color:#c4b5fd;font-size:12px;font-family:'Fira Mono','Courier New',monospace;white-space:pre-wrap;max-height:200px;overflow-y:auto;line-height:1.8}
+
+/* ── SHARE LINK ── */
+.share-link-row{display:flex;gap:8px;align-items:center}
+.share-link-row input{flex:1;height:38px;padding:0 13px;border:1.5px solid var(--rk-border);border-radius:10px;font-size:13px;color:var(--rk-muted);background:var(--rk-bg);font-family:'Inter',sans-serif}
+
+/* ── FOOTER ── */
+.wiz-footer{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.5rem;border-top:1.5px solid var(--rk-border-light)}
+.btn-primary{background:var(--rk-purple);color:#fff;border:none;padding:11px 24px;border-radius:30px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:background .15s}
+.btn-primary:hover{background:var(--rk-purple-dark)}
+.btn-sec{background:none;border:1.5px solid var(--rk-border);color:var(--rk-muted);padding:11px 20px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:all .15s}
+.btn-sec:hover{border-color:var(--rk-purple);color:var(--rk-purple);background:var(--rk-purple-xlight)}
+
+/* ── SAVE INDICATOR ── */
+.wiz-saving{position:fixed;top:76px;right:16px;background:var(--rk-purple);color:#fff;font-size:12px;font-weight:600;padding:6px 16px;border-radius:20px;display:none;z-index:200;box-shadow:0 4px 12px rgba(124,58,237,0.3)}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--rk-navy);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;display:none;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.toast.show{display:flex}
+.toast.success{background:var(--rk-success)}
+.toast.error{background:var(--rk-danger)}
+
+@media(max-width:640px){
+  .f-grid-2,.f-grid-3,.platform-grid{grid-template-columns:1fr}
+  .wizard-wrap{margin:1rem auto}
+  .wiz-body{padding:1.25rem}
+  .dash-hero,.dash-table-wrap{padding-left:1.25rem;padding-right:1.25rem}
+  .dash-toolbar{padding-left:1.25rem;padding-right:1.25rem}
+  .nav{padding:0 1.25rem}
+  .wiz-steps{overflow-x:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-logo" href="#" onclick="showPage('dashboard')">
+    <svg class="nav-logo-mark" width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <rect width="36" height="36" rx="9" fill="#7C3AED"/>
+      <path d="M10 26 L18 10 L26 26" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M13.5 20 L22.5 20" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-logo-text">Rank<span>On</span></span>
+  </a>
+  <div class="nav-divider"></div>
+  <span class="nav-tag">Client CRM</span>
+  <div class="nav-actions">
+    <button class="nav-link" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-link" onclick="showPage('settings');loadSettings()">⚙ Settings</button>
+    <button class="nav-cta" onclick="newClient()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      New client
+    </button>
+  </div>
+</nav>
+
+<div id="wiz-saving" class="wiz-saving">Saving…</div>
+<div id="toast" class="toast"></div>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div id="page-dashboard" class="page active">
+  <div class="dash-hero">
+    <h1>Client Onboarding</h1>
+    <p>Manage and track digital marketing client intake for Rankon</p>
+    <div class="dash-hero-pills">
+      <span class="hero-pill">Business Profile</span>
+      <span class="hero-pill">Digital Assets</span>
+      <span class="hero-pill">WHOIS Lookup</span>
+      <span class="hero-pill">Vault Export</span>
+    </div>
+  </div>
+
+  <div class="dash-stats">
+    <div class="stat"><div class="stat-n" id="stat-total">0</div><div class="stat-l">Total Clients</div></div>
+    <div class="stat"><div class="stat-n" id="stat-pending">0</div><div class="stat-l">In Progress</div></div>
+    <div class="stat"><div class="stat-n" id="stat-done">0</div><div class="stat-l">Completed</div></div>
+  </div>
+
+  <div class="dash-toolbar">
+    <input id="dash-search" type="text" placeholder="🔍  Search clients…" oninput="renderTable()">
+    <button class="btn-sec" style="border-radius:30px;height:38px;font-size:13px" onclick="loadDashboard()">↻ Refresh</button>
+  </div>
+
+  <div class="dash-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Business name</th>
+          <th>Industry</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Last seen</th>
+          <th>Alerts</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="client-tbody"></tbody>
+    </table>
+    <div id="empty-state" class="empty-state" style="display:none">
+      <span class="empty-icon">📋</span>
+      <strong style="display:block;font-size:16px;margin-bottom:6px;color:var(--rk-text)">No clients yet</strong>
+      <span style="font-size:14px">Click <strong>New client</strong> above to start onboarding your first client.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SETTINGS PAGE ═══════════════ -->
+<div id="page-settings" class="page">
+  <div class="dash-hero">
+    <h1>Settings</h1>
+    <p>Configure agency details and platform access emails shown to clients</p>
+  </div>
+  <div style="max-width:760px;margin:2rem auto;padding:0 2rem 4rem">
+
+    <div style="background:var(--rk-white);border:1.5px solid var(--rk-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem">
+      <div class="sec-title">Agency details</div>
+      <p style="font-size:13px;color:var(--rk-muted);margin-bottom:1.25rem">Shown on the client-facing onboarding form and thank-you screen.</p>
+      <div class="f-grid f-grid-2">
+        <div class="field"><label>Agency name</label><input id="s-agency-name" placeholder="Rankon Digital Marketing"></div>
+        <div class="field"><label>Contact email</label><input id="s-agency-email" type="email" placeholder="hello@rankon.com.au"></div>
+        <div class="field"><label>Phone</label><input id="s-agency-phone" placeholder="1300 000 000"></div>
+        <div class="field"><label>Website</label><input id="s-agency-website" placeholder="https://rankon.com.au"></div>
+      </div>
+    </div>
+
+    <div style="background:var(--rk-white);border:1.5px solid var(--rk-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem">
+      <div class="sec-title">Platform access emails</div>
+      <p style="font-size:13px;color:var(--rk-muted);margin-bottom:1.25rem">These are the Rankon email addresses shown to clients for each platform's access step. Clients will copy these to grant you access.</p>
+      <div class="f-grid f-grid-2">
+        <div class="field"><label>📘 Facebook &amp; Instagram</label><input id="s-facebook" placeholder="facebook@rankon.com.au"></div>
+        <div class="field"><label>📣 Meta Ads Manager</label><input id="s-metaAds" placeholder="facebook@rankon.com.au"></div>
+        <div class="field"><label>🗺 Google (GBP + Analytics + GSC)</label><input id="s-google" placeholder="google@rankon.com.au"></div>
+        <div class="field"><label>📢 Google Ads</label><input id="s-googleAds" placeholder="googleads@rankon.com.au"></div>
+        <div class="field"><label>🪟 Microsoft / Bing Ads</label><input id="s-microsoft" placeholder="microsoft@rankon.com.au"></div>
+        <div class="field"><label>🎵 TikTok Business</label><input id="s-tiktok" placeholder="tiktok@rankon.com.au"></div>
+        <div class="field"><label>💼 LinkedIn</label><input id="s-linkedin" placeholder="linkedin@rankon.com.au"></div>
+      </div>
+    </div>
+
+    <div style="background:var(--rk-white);border:1.5px solid var(--rk-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem">
+      <div class="sec-title">Security &amp; access</div>
+      <div class="f-grid f-grid-2">
+        <div class="field">
+          <label>Token expiry (days)</label>
+          <input id="s-tokenExpiry" type="number" min="1" max="365" placeholder="30">
+          <span style="font-size:11.5px;color:var(--rk-muted-light)">Onboarding links expire after this many days</span>
+        </div>
+        <div class="field">
+          <label>Completion notification email</label>
+          <input id="s-notifyEmail" type="email" placeholder="hello@rankon.com.au">
+          <span style="font-size:11.5px;color:var(--rk-muted-light)">Get notified when a client submits</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:12px 14px;background:var(--rk-purple-xlight);border-radius:10px;border:1.5px solid var(--rk-border-light)">
+        <input type="checkbox" id="s-pinRequired" style="width:16px;height:16px;accent-color:var(--rk-purple);cursor:pointer">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--rk-text)">Require PIN for client links</div>
+          <div style="font-size:12px;color:var(--rk-muted)">A 4-digit PIN is generated per client and must be shared with them separately (e.g. by phone/SMS)</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--rk-white);border:1.5px solid var(--rk-border);border-radius:14px;padding:1.75rem;margin-bottom:1.25rem">
+      <div class="sec-title">Webhook (optional)</div>
+      <div class="field">
+        <label>Completion webhook URL</label>
+        <input id="s-webhook" type="url" placeholder="https://hooks.zapier.com/… or n8n endpoint">
+        <span style="font-size:11.5px;color:var(--rk-muted-light)">POST request sent when a client completes onboarding. Works with Zapier, Make, n8n, etc.</span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn-sec" onclick="showPage('dashboard')">Cancel</button>
+      <button class="btn-primary" onclick="saveSettings()">Save settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ WIZARD ═══════════════ -->
+<div id="page-wizard" class="page">
+  <div class="wizard-wrap">
+    <div class="wiz-card">
+
+      <!-- Header -->
+      <div class="wiz-head">
+        <div class="wiz-head-logo">
+          <svg width="22" height="22" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.15)"/><path d="M10 26 L18 10 L26 26" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M13.5 20 L22.5 20" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+          <span>Rank<em>On</em> &nbsp;·&nbsp; Client Onboarding</span>
+        </div>
+        <div class="wiz-title" id="wiz-title">New client</div>
+        <div class="wiz-sub" id="wiz-sub">Fill in business details to get started</div>
+      </div>
+
+      <!-- Step tabs -->
+      <div class="wiz-steps">
+        <div class="wiz-step active" id="wstab1" onclick="goStep(1)">
+          <div class="wiz-step-n" id="wsn1">1</div>
+          <div class="wiz-step-label">Business profile</div>
+        </div>
+        <div class="wiz-step" id="wstab2" onclick="goStep(2)">
+          <div class="wiz-step-n" id="wsn2">2</div>
+          <div class="wiz-step-label">Digital assets</div>
+        </div>
+        <div class="wiz-step" id="wstab3" onclick="goStep(3)">
+          <div class="wiz-step-n" id="wsn3">3</div>
+          <div class="wiz-step-label">Vault export</div>
+        </div>
+      </div>
+
+      <div class="wiz-body">
+
+        <!-- ── STEP 1 ── -->
+        <div id="ws1">
+          <div class="sec-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="3" stroke="#7C3AED" stroke-width="1.5"/><path d="M4 7h6M4 4.5h6M4 9.5h4" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Business information
+          </div>
+          <div class="f-grid f-grid-2">
+            <div class="field"><label>Business name <span class="req">*</span></label><input id="bizName" placeholder="Acme Pty Ltd" oninput="autoSave()"></div>
+            <div class="field"><label>ABN</label><input id="abn" placeholder="12 345 678 901" maxlength="14" oninput="autoSave()"></div>
+            <div class="field"><label>Billing email <span class="req">*</span></label><input id="billingEmail" type="email" placeholder="accounts@business.com.au" oninput="autoSave()"></div>
+            <div class="field"><label>Industry</label>
+              <select id="industry" onchange="autoSave()">
+                <option value="">Select industry</option>
+                <option>Restaurant / Hospitality</option><option>Retail / E-commerce</option>
+                <option>Jewellery / Fashion</option><option>Automotive / Trailers</option>
+                <option>Commercial Property</option><option>Professional Services</option>
+                <option>Health / Medical</option><option>Construction / Trade</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sec-title" style="margin-top:.25rem">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="3" stroke="#7C3AED" stroke-width="1.5"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Primary contact
+          </div>
+          <div class="f-grid f-grid-2">
+            <div class="field"><label>Contact name <span class="req">*</span></label><input id="contactName" placeholder="Full name" oninput="autoSave()"></div>
+            <div class="field"><label>Phone <span class="req">*</span></label><input id="phone" type="tel" placeholder="04xx xxx xxx" oninput="autoSave()"></div>
+            <div class="field"><label>Contact email</label><input id="contactEmail" type="email" placeholder="name@business.com.au" oninput="autoSave()"></div>
+            <div class="field"><label>Role / Title</label><input id="role" placeholder="Owner, Marketing Manager…" oninput="autoSave()"></div>
+          </div>
+
+          <div class="sec-title" style="margin-top:.25rem">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1C4.79 1 3 2.79 3 5c0 3 4 8 4 8s4-5 4-8c0-2.21-1.79-4-4-4z" stroke="#7C3AED" stroke-width="1.5" stroke-linejoin="round"/><circle cx="7" cy="5" r="1.5" stroke="#7C3AED" stroke-width="1.2"/></svg>
+            Business addresses
+          </div>
+          <div id="addrList"></div>
+          <div class="add-row" style="margin-bottom:1.25rem">
+            <div class="field"><label>Street</label><input id="addrStreet" placeholder="123 Example St"></div>
+            <div class="field"><label>Suburb</label><input id="addrSuburb" placeholder="Melbourne"></div>
+            <div class="field" style="max-width:75px"><label>State</label><input id="addrState" placeholder="VIC" maxlength="3"></div>
+            <div class="field" style="max-width:85px"><label>Postcode</label><input id="addrPC" placeholder="3000" maxlength="4"></div>
+            <button class="btn-add" onclick="addAddress()">+ Add</button>
+          </div>
+
+          <div class="sec-title" style="margin-top:.25rem">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10v8a1 1 0 01-1 1H3a1 1 0 01-1-1V3z" stroke="#7C3AED" stroke-width="1.5"/><path d="M2 3l5-2 5 2" stroke="#7C3AED" stroke-width="1.5" stroke-linejoin="round"/><path d="M5.5 8v-2M8.5 8v-2" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Internal notes
+          </div>
+          <div class="field" style="margin-bottom:1rem">
+            <textarea id="notes" rows="3" placeholder="Notes about this client, campaign brief, special instructions…" oninput="autoSave()"></textarea>
+          </div>
+
+          <div class="wiz-footer">
+            <span style="font-size:12px;color:var(--rk-muted)"><span class="req">*</span> required fields</span>
+            <button class="btn-primary" onclick="nextStep(1)">Continue to digital assets →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 2 ── -->
+        <div id="ws2" style="display:none">
+          <div class="sec-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#7C3AED" stroke-width="1.5"/><path d="M4.5 7c0-3 1.12-5.5 2.5-5.5S9.5 4 9.5 7s-1.12 5.5-2.5 5.5S4.5 10 4.5 7z" stroke="#7C3AED" stroke-width="1.2"/><path d="M1.5 7h11" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Social media
+          </div>
+          <div class="platform-grid">
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#1877F2">📘</div><div class="platform-name">Facebook</div></div>
+              <input id="fb" placeholder="Page URL or Page ID" oninput="autoSave()">
+            </div>
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366)">📸</div><div class="platform-name">Instagram</div></div>
+              <input id="ig" placeholder="@handle or profile URL" oninput="autoSave()">
+            </div>
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#010101">🎵</div><div class="platform-name">TikTok</div></div>
+              <input id="tt" placeholder="@handle or profile URL" oninput="autoSave()">
+            </div>
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#0A66C2">💼</div><div class="platform-name">LinkedIn</div></div>
+              <input id="li" placeholder="Company page URL" oninput="autoSave()">
+            </div>
+          </div>
+
+          <div class="sec-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#7C3AED" stroke-width="1.5"/><path d="M5 5.5c.3-1.2 1.3-2 2.5-2 1.4 0 2.5 1.1 2.5 2.5 0 1.7-2.5 2-2.5 3.5" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="10.5" r=".5" fill="#7C3AED"/></svg>
+            Google
+          </div>
+          <div class="platform-grid">
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#4285F4">🗺</div><div class="platform-name">Google Business Profile</div></div>
+              <input id="gbp" placeholder="Profile URL or CID" oninput="autoSave()">
+            </div>
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#E37400">📊</div><div class="platform-name">Google Analytics GA4</div></div>
+              <input id="ga4" placeholder="G-XXXXXXXXXX" oninput="autoSave()">
+            </div>
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#34A853">📢</div><div class="platform-name">Google Ads</div></div>
+              <input id="gads" placeholder="Customer ID (xxx-xxx-xxxx)" oninput="autoSave()">
+            </div>
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#EA4335">🔍</div><div class="platform-name">Search Console</div></div>
+              <input id="gsc" placeholder="Verified domain URL" oninput="autoSave()">
+            </div>
+          </div>
+
+          <div class="sec-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="3.5" width="11" height="8" rx="1.5" stroke="#7C3AED" stroke-width="1.5"/><path d="M4 3.5V3a1 1 0 011-1h4a1 1 0 011 1v.5" stroke="#7C3AED" stroke-width="1.3"/><path d="M5 7.5h4" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Advertising platforms
+          </div>
+          <div class="platform-grid" style="margin-bottom:1.5rem">
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#0078D4">🪟</div><div class="platform-name">Microsoft / Bing Ads</div></div>
+              <input id="msads" placeholder="Account ID" oninput="autoSave()">
+            </div>
+            <div class="platform-card">
+              <div class="platform-card-head"><div class="platform-icon" style="background:#1877F2">📣</div><div class="platform-name">Meta Ads Manager</div></div>
+              <input id="metaads" placeholder="Ad Account ID" oninput="autoSave()">
+            </div>
+          </div>
+
+          <div class="sec-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#7C3AED" stroke-width="1.5"/><path d="M4.5 7c0-3 1.12-5.5 2.5-5.5S9.5 4 9.5 7s-1.12 5.5-2.5 5.5S4.5 10 4.5 7z" stroke="#7C3AED" stroke-width="1.2"/><path d="M1.5 7h11" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Domain names
+          </div>
+          <div id="domainCards"></div>
+          <div class="domain-add-row">
+            <input id="domainInput" placeholder="example.com.au" onkeydown="if(event.key==='Enter')addDomain()">
+            <button class="domain-lookup-btn" id="whoisBtn" onclick="addDomain()">🔍 Add + WHOIS</button>
+          </div>
+          <p style="font-size:12px;color:var(--rk-muted-light);margin-top:7px;margin-bottom:1rem">Nameservers, registrar and expiry fetched automatically via RDAP.</p>
+
+          <div class="wiz-footer">
+            <button class="btn-sec" onclick="goStep(1)">← Back</button>
+            <button class="btn-primary" onclick="goStep(3)">Generate vault export →</button>
+          </div>
+        </div>
+
+        <!-- ── STEP 3 ── -->
+        <div id="ws3" style="display:none">
+          <div class="sec-title">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="11" rx="2" stroke="#7C3AED" stroke-width="1.5"/><path d="M4.5 5h5M4.5 7.5h5M4.5 10h3" stroke="#7C3AED" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Vaultwarden export
+          </div>
+          <p style="font-size:13px;color:var(--rk-muted);margin-bottom:1.25rem;line-height:1.6">Bitwarden-compatible JSON for direct import, plain-text vault note to paste into a secure note, or download the JSON file for backup.</p>
+
+          <div class="export-actions">
+            <button class="exp-btn primary" onclick="copyJSON()">📋 Copy JSON</button>
+            <button class="exp-btn dark" onclick="downloadJSON()">⬇ Download JSON</button>
+            <button class="exp-btn green" onclick="copyVaultNote()">🔐 Copy vault note</button>
+          </div>
+          <div class="export-pre-wrap">
+            <div class="export-pre" id="exportPre"></div>
+          </div>
+
+          <div class="sec-title" style="margin-top:1.5rem">Plain text vault note</div>
+          <div class="vault-note-wrap">
+            <div class="vault-note" id="vaultNote"></div>
+          </div>
+
+          <div class="sec-title" style="margin-top:1.5rem">Shareable onboarding link</div>
+          <div class="share-link-row" style="margin-bottom:.5rem">
+            <input id="shareLink" readonly>
+            <button class="exp-btn dark" style="padding:9px 16px;border-radius:10px;white-space:nowrap" onclick="copyLink()">Copy link</button>
+          </div>
+          <p style="font-size:12px;color:var(--rk-muted-light);margin-bottom:1rem">Send to the client so they can complete their digital asset details directly.</p>
+
+          <div class="wiz-footer">
+            <button class="btn-sec" onclick="goStep(2)">← Back</button>
+            <button class="btn-primary" onclick="showPage('dashboard');loadDashboard()">← Back to dashboard</button>
+          </div>
+        </div>
+
+      </div><!-- wiz-body -->
+    </div><!-- wiz-card -->
+  </div><!-- wizard-wrap -->
+</div>
+
+<script>
+const API='';
+let currentClientId=null,allClients=[],addresses=[],domains=[],saveTimer=null,_step=1;
+
+function showPage(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+n).classList.add('active')}
+
+async function loadDashboard(){
+  try{const r=await fetch(API+'/api/clients');allClients=await r.json();renderStats();renderTable();}
+  catch(e){showToast('Cannot connect to server','error')}
+}
+function renderStats(){
+  document.getElementById('stat-total').textContent=allClients.length;
+  document.getElementById('stat-pending').textContent=allClients.filter(c=>c.step<3).length;
+  document.getElementById('stat-done').textContent=allClients.filter(c=>c.step>=3).length;
+}
+function renderTable(){
+  const q=document.getElementById('dash-search').value.toLowerCase();
+  const filtered=allClients.filter(c=>(c.businessName||'').toLowerCase().includes(q)||(c.contact||'').toLowerCase().includes(q)||(c.industry||'').toLowerCase().includes(q));
+  const tbody=document.getElementById('client-tbody');
+  const empty=document.getElementById('empty-state');
+  if(!filtered.length){tbody.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  tbody.innerHTML=filtered.map(c=>`<tr>
+    <td><strong>${c.businessName||'<em style="color:#9898c0">Unnamed</em>'}</strong>${c.tokenExpired?'<br><span style="font-size:10px;color:var(--rk-warning)">⏰ Link expired</span>':''}</td>
+    <td style="color:var(--rk-muted);font-size:13px">${c.industry||'—'}</td>
+    <td style="font-size:13px">${c.contact||'—'}</td>
+    <td>${stepBadge(c)}</td>
+    <td style="color:var(--rk-muted-light);font-size:12px">${c.lastSeen?fmtDate(c.lastSeen)+'<br><span>last seen</span>':'<span>Never opened</span>'}</td>
+    <td>${c.expiringDomains>0?`<span style="font-size:11px;background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:2px 8px;border-radius:20px;font-weight:600">⚠ ${c.expiringDomains} domain${c.expiringDomains>1?'s':''} expiring</span>`:'<span style="color:var(--rk-muted-light);font-size:12px">—</span>'}</td>
+    <td><div class="tbl-actions">
+      <button class="tbl-btn" onclick="editClient('${c.id}')">Edit</button>
+      <button class="tbl-btn" onclick="copyClientLink('${c.token}')">Copy link</button>
+      <button class="tbl-btn" onclick="regenToken('${c.id}')">Regen link</button>
+      <button class="tbl-btn" onclick="exportClient('${c.id}')">Export</button>
+      <button class="tbl-btn danger" onclick="deleteClient('${c.id}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+}
+function stepBadge(c){
+  if(c.completed)return'<span class="badge badge-done">✓ Complete</span>';
+  if(!c.step||c.step===1)return'<span class="badge badge-step1">Step 1</span>';
+  return'<span class="badge badge-step2">Step '+c.step+'</span>';
+}
+function fmtDate(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'})}
+function copyClientLink(token){navigator.clipboard.writeText(window.location.origin+'/onboard/'+token).then(()=>showToast('Onboarding link copied','success'))}
+async function regenToken(id){
+  if(!confirm('Regenerate link? The old link stops working.'))return;
+  const r=await fetch(API+'/api/clients/'+id+'/regenerate-token',{method:'POST'});
+  const data=await r.json();
+  navigator.clipboard.writeText(window.location.origin+'/onboard/'+data.token);
+  showToast('New link generated and copied','success');loadDashboard();
+}
+async function newClient(){
+  try{const r=await fetch(API+'/api/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    const c=await r.json();
+    if(c.error==='duplicate_abn'){showToast('ABN already exists: '+c.existing,'error');return;}
+    await openWizard(c);}
+  catch(e){showToast('Server not reachable','error')}
+}
+async function editClient(id){
+  try{const r=await fetch(API+'/api/clients/'+id);const c=await r.json();await openWizard(c);}
+  catch(e){showToast('Could not load client','error')}
+}
+async function openWizard(client){
+  currentClientId=client.id;
+  addresses=client.business?.addresses||[];
+  domains=client.domains||[];
+  sv('bizName',client.business?.name);sv('abn',client.business?.abn);sv('billingEmail',client.business?.billingEmail);sv('industry',client.business?.industry);sv('notes',client.business?.notes);
+  sv('contactName',client.contact?.name);sv('phone',client.contact?.phone);sv('contactEmail',client.contact?.email);sv('role',client.contact?.role);
+  sv('fb',client.social?.facebook);sv('ig',client.social?.instagram);sv('tt',client.social?.tiktok);sv('li',client.social?.linkedin);
+  sv('gbp',client.google?.businessProfile);sv('ga4',client.google?.analyticsGA4);sv('gads',client.google?.adsCID);sv('gsc',client.google?.searchConsole);
+  sv('msads',client.advertising?.microsoftAds);sv('metaads',client.advertising?.metaAds);
+  document.getElementById('wiz-title').textContent=client.business?.name||'New client';
+  document.getElementById('wiz-sub').textContent=client.business?.industry||'Onboarding in progress';
+  document.getElementById('shareLink').value=window.location.origin+'/onboard/'+client.token;
+  renderAddresses();renderDomains();goStep(client.step||1);showPage('wizard');
+}
+function sv(id,val){const el=document.getElementById(id);if(el)el.value=val||''}
+function gv(id){return document.getElementById(id)?.value?.trim()||''}
+
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveClient,800)}
+async function saveClient(step){
+  if(!currentClientId)return;
+  const ind=document.getElementById('wiz-saving');ind.style.display='block';
+  const payload={step:step||_step,
+    business:{name:gv('bizName'),abn:gv('abn'),billingEmail:gv('billingEmail'),industry:gv('industry'),addresses,notes:gv('notes')},
+    contact:{name:gv('contactName'),phone:gv('phone'),email:gv('contactEmail'),role:gv('role')},
+    social:{facebook:gv('fb'),instagram:gv('ig'),tiktok:gv('tt'),linkedin:gv('li')},
+    google:{businessProfile:gv('gbp'),analyticsGA4:gv('ga4'),adsCID:gv('gads'),searchConsole:gv('gsc')},
+    advertising:{microsoftAds:gv('msads'),metaAds:gv('metaads')},domains};
+  try{await fetch(API+'/api/clients/'+currentClientId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch(e){}
+  setTimeout(()=>{ind.style.display='none'},700);
+}
+
+function goStep(n){
+  _step=n;
+  [1,2,3].forEach(i=>{
+    const el=document.getElementById('ws'+i);if(el)el.style.display=i===n?'block':'none';
+    const tab=document.getElementById('wstab'+i);const sn=document.getElementById('wsn'+i);
+    if(!tab)return;
+    tab.classList.remove('active','done');
+    if(i===n)tab.classList.add('active');
+    else if(i<n){tab.classList.add('done');sn.textContent='✓';}
+    else sn.textContent=i;
+  });
+  if(n===3)buildExport();
+  saveClient(n);
+}
+function nextStep(from){
+  if(from===1&&(!gv('bizName')||!gv('billingEmail')||!gv('contactName')||!gv('phone'))){showToast('Please fill in all required fields','error');return;}
+  goStep(from+1);
+}
+
+function addAddress(){
+  const s=gv('addrStreet'),sub=gv('addrSuburb'),st=gv('addrState'),pc=gv('addrPC');
+  if(!s){showToast('Enter a street address','error');return;}
+  addresses.push([s,sub,st,pc].filter(Boolean).join(', '));
+  renderAddresses();
+  ['addrStreet','addrSuburb','addrState','addrPC'].forEach(id=>document.getElementById(id).value='');
+  autoSave();
+}
+function removeAddr(i){addresses.splice(i,1);renderAddresses();autoSave()}
+function renderAddresses(){
+  document.getElementById('addrList').innerHTML=addresses.map((a,i)=>
+    `<div class="addr-chip"><span>📍 ${a}</span><button class="chip-del" onclick="removeAddr(${i})">×</button></div>`
+  ).join('');
+}
+
+async function addDomain(){
+  const input=document.getElementById('domainInput');
+  const raw=input.value.trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'').toLowerCase();
+  if(!raw)return;
+  input.value='';
+  const btn=document.getElementById('whoisBtn');btn.disabled=true;btn.textContent='⏳ Looking up…';
+  const idx=domains.length;
+  domains.push({domain:raw,ns:[],registrar:'',expiry:'',hosting:'',loading:true});
+  renderDomains();
+  try{const r=await fetch(API+'/api/whois/'+encodeURIComponent(raw));const data=await r.json();domains[idx]={domain:raw,...data,loading:false};}
+  catch(e){domains[idx]={domain:raw,ns:[],registrar:'',expiry:'',hosting:'',loading:false,error:true};}
+  btn.disabled=false;btn.textContent='🔍 Add + WHOIS';
+  renderDomains();autoSave();
+}
+function removeDomain(i){domains.splice(i,1);renderDomains();autoSave()}
+function renderDomains(){
+  document.getElementById('domainCards').innerHTML=domains.map((d,i)=>{
+    if(d.loading)return`<div class="domain-card"><div class="domain-card-head"><div class="domain-name">🌐 ${d.domain}</div></div><div style="font-size:12px;color:var(--rk-muted)"><span class="loading-dot">Fetching WHOIS data…</span></div></div>`;
+    if(d.error)return`<div class="domain-card"><div class="domain-card-head"><div class="domain-name">🌐 ${d.domain}</div><button class="chip-del" onclick="removeDomain(${i})">×</button></div><div style="font-size:12px;color:var(--rk-danger)">WHOIS lookup failed — domain saved without DNS details.</div></div>`;
+    const nsHtml=(d.ns||[]).map(n=>`<span class="ns-tag">${n}</span>`).join('');
+    return`<div class="domain-card">
+      <div class="domain-card-head"><div class="domain-name">🌐 ${d.domain}</div><button class="chip-del" onclick="removeDomain(${i})">×</button></div>
+      <div class="domain-meta">
+        ${d.registrar?`<div>Registrar: <strong>${d.registrar}</strong></div>`:''}
+        ${d.expiry?`<div>Expires: <strong>${d.expiry}</strong></div>`:''}
+        ${d.hosting?`<div>Hosting: <strong>${d.hosting}</strong></div>`:''}
+      </div>
+      ${d.ns?.length?`<div class="domain-ns">Nameservers: ${nsHtml}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function buildExportData(){
+  return{object:'Rankon Client Onboarding',generated:new Date().toISOString(),
+    business:{name:gv('bizName'),abn:gv('abn'),billingEmail:gv('billingEmail'),industry:gv('industry'),addresses,notes:gv('notes')},
+    contact:{name:gv('contactName'),phone:gv('phone'),email:gv('contactEmail'),role:gv('role')},
+    social:{facebook:gv('fb'),instagram:gv('ig'),tiktok:gv('tt'),linkedin:gv('li')},
+    google:{businessProfile:gv('gbp'),analyticsGA4:gv('ga4'),adsCID:gv('gads'),searchConsole:gv('gsc')},
+    advertising:{microsoftAds:gv('msads'),metaAds:gv('metaads')},domains};
+}
+function buildVaultNote(d){
+  const ln=(k,v)=>`${k.padEnd(24,' ')}${v||'—'}`;
+  const hr='─'.repeat(50);
+  return['RANKON CLIENT ONBOARDING',d.business.name||'Unnamed',`Generated: ${new Date(d.generated).toLocaleString('en-AU')}`,hr,
+    'BUSINESS',ln('ABN:',d.business.abn),ln('Billing email:',d.business.billingEmail),ln('Industry:',d.business.industry),
+    'Addresses:',...(d.business.addresses||[]).map(a=>'  '+a),d.business.notes?`Notes: ${d.business.notes}`:'',hr,
+    'CONTACT',ln('Name:',d.contact.name),ln('Phone:',d.contact.phone),ln('Email:',d.contact.email),ln('Role:',d.contact.role),hr,
+    'SOCIAL MEDIA',ln('Facebook:',d.social.facebook),ln('Instagram:',d.social.instagram),ln('TikTok:',d.social.tiktok),ln('LinkedIn:',d.social.linkedin),hr,
+    'GOOGLE',ln('Business Profile:',d.google.businessProfile),ln('GA4 Property:',d.google.analyticsGA4),ln('Google Ads CID:',d.google.adsCID),ln('Search Console:',d.google.searchConsole),hr,
+    'ADVERTISING',ln('Microsoft Ads:',d.advertising.microsoftAds),ln('Meta Ads:',d.advertising.metaAds),hr,
+    'DOMAINS',...(d.domains||[]).flatMap(dm=>[`Domain: ${dm.domain}`,`  Registrar: ${dm.registrar||'—'}`,`  Expiry:    ${dm.expiry||'—'}`,`  Hosting:   ${dm.hosting||'—'}`,`  NS:        ${(dm.ns||[]).join(', ')||'—'}`,''])
+  ].filter(l=>l!==null).join('\n');
+}
+function buildExport(){
+  const d=buildExportData();
+  const bw={encrypted:false,items:[{type:2,name:`[Rankon] ${d.business.name} — Business Profile`,notes:buildVaultNote(d),secureNote:{type:0}}]};
+  document.getElementById('exportPre').textContent=JSON.stringify(bw,null,2);
+  document.getElementById('vaultNote').textContent=buildVaultNote(d);
+}
+function copyJSON(){navigator.clipboard.writeText(document.getElementById('exportPre').textContent).then(()=>showToast('JSON copied','success'))}
+function copyVaultNote(){navigator.clipboard.writeText(document.getElementById('vaultNote').textContent).then(()=>showToast('Vault note copied','success'))}
+function copyLink(){navigator.clipboard.writeText(document.getElementById('shareLink').value).then(()=>showToast('Link copied','success'))}
+function downloadJSON(){
+  const name=(gv('bizName')||'client').replace(/\s+/g,'_');
+  const blob=new Blob([document.getElementById('exportPre').textContent],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`rankon_onboarding_${name}.json`;a.click();
+}
+async function deleteClient(id){
+  if(!confirm('Delete this client record? This cannot be undone.'))return;
+  await fetch(API+'/api/clients/'+id,{method:'DELETE'});
+  showToast('Client deleted');loadDashboard();
+}
+async function exportClient(id){
+  const r=await fetch(API+'/api/clients/'+id+'/export');const data=await r.json();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`rankon_export_${id.slice(0,8)}.json`;a.click();
+}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');
+  setTimeout(()=>{t.className='toast'},2800);
+}
+
+// ── SETTINGS ─────────────────────────────────────────────
+async function loadSettings(){
+  try{
+    const s=await fetch(API+'/api/settings').then(r=>r.json());
+    sv('s-agency-name',s.agency?.name);sv('s-agency-email',s.agency?.email);
+    sv('s-agency-phone',s.agency?.phone);sv('s-agency-website',s.agency?.website);
+    sv('s-facebook',s.platformEmails?.facebook);sv('s-metaAds',s.platformEmails?.metaAds);
+    sv('s-google',s.platformEmails?.google);sv('s-googleAds',s.platformEmails?.googleAds);
+    sv('s-microsoft',s.platformEmails?.microsoft);sv('s-tiktok',s.platformEmails?.tiktok);
+    sv('s-linkedin',s.platformEmails?.linkedin);
+    sv('s-tokenExpiry',s.tokenExpiryDays||30);sv('s-notifyEmail',s.notificationEmail);
+    sv('s-webhook',s.completionWebhook);
+    const pin=document.getElementById('s-pinRequired');if(pin)pin.checked=!!s.pinRequired;
+  }catch(e){showToast('Could not load settings','error')}
+}
+async function saveSettings(){
+  const payload={
+    agency:{name:gv('s-agency-name'),email:gv('s-agency-email'),phone:gv('s-agency-phone'),website:gv('s-agency-website')},
+    platformEmails:{facebook:gv('s-facebook'),instagram:gv('s-facebook'),metaAds:gv('s-metaAds'),google:gv('s-google'),gbp:gv('s-google'),gsc:gv('s-google'),googleAds:gv('s-googleAds'),microsoft:gv('s-microsoft'),tiktok:gv('s-tiktok'),linkedin:gv('s-linkedin')},
+    tokenExpiryDays:parseInt(gv('s-tokenExpiry'))||30,
+    notificationEmail:gv('s-notifyEmail'),
+    completionWebhook:gv('s-webhook'),
+    pinRequired:document.getElementById('s-pinRequired')?.checked||false
+  };
+  try{
+    await fetch(API+'/api/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    showToast('Settings saved','success');
+  }catch(e){showToast('Save failed','error')}
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
