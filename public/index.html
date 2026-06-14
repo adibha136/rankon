@@ -334,6 +334,7 @@ tr:hover td{background:var(--rk-purple-xlight)}
       <div class="nav-user-avatar" id="nav-avatar">?</div>
       <div style="display:flex;flex-direction:column;gap:1px">
         <span id="nav-username" style="line-height:1.2">User</span>
+        <span id="nav-email" style="font-size:10px;font-weight:400;opacity:.7;line-height:1;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
         <span id="nav-role-badge" style="font-size:10px;font-weight:500;opacity:.75;line-height:1">—</span>
       </div>
     </div>
@@ -842,6 +843,8 @@ function showNavUser(u){
   const initials = (u.name||u.email||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('nav-avatar').textContent = initials;
   document.getElementById('nav-username').textContent = u.name || u.email;
+  const emailEl = document.getElementById('nav-email');
+  if(emailEl && u.email) emailEl.textContent = u.email;
   const rb = document.getElementById('nav-role-badge');
   if(rb){ rb.textContent = ROLE_LABELS[u.role]||u.role||''; rb.setAttribute('style','font-size:10px;font-weight:600;opacity:1;line-height:1;'+(ROLE_COLOURS[u.role]||'')); }
   document.getElementById('nav-user').style.display  = 'flex';
@@ -893,7 +896,7 @@ async function msLogin(){
         : 'Login failed — please try again.';
       showLoginErr(msg);
     } else {
-      setSession(data.token, { email: data.email, name: data.name });
+      setSession(data.token, { email: data.email, name: data.name, role: data.role });
       document.getElementById('login-screen').classList.add('hidden');
       loadDashboard();
     }
