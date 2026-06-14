@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>Rankon — Client Onboarding</title>
 <link rel="icon" type="image/jpeg" href="/favicon.jpg">
 <link rel="shortcut icon" type="image/jpeg" href="/favicon.jpg">
@@ -1229,8 +1231,11 @@ function _renderViewModal(c){
   const ps = c.platformStatus || {};
   const platRows = PLAT_DEFS.map(p => {
     const s = ps[p.id] || {};
+    // For older clients without saved platformStatus, infer from URL/ID field:
+    // if the client filled in a URL/ID, treat it as Done; otherwise Pending.
+    const inferredDone = !ps[p.id] && !!p.val;
     let badge, badgeStyle;
-    if (s.done)     { badge='✓ Done';   badgeStyle='background:#ecfdf5;color:#059669;border:1px solid #a7f3d0'; }
+    if (s.done || inferredDone) { badge = s.done ? '✓ Done' : '✓ Value provided'; badgeStyle='background:#ecfdf5;color:#059669;border:1px solid #a7f3d0'; }
     else if (s.na)  { badge='N/A';      badgeStyle='background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb'; }
     else            { badge='Pending';  badgeStyle='background:#fffbeb;color:#b45309;border:1px solid #fde68a'; }
     const valHtml = p.val
