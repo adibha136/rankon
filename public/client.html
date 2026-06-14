@@ -41,9 +41,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 
 /* STEP PROGRESS */
 .steps{display:flex;gap:0;background:var(--white);border-bottom:1.5px solid var(--border)}
-.step-tab{flex:1;display:flex;align-items:center;gap:8px;padding:.875rem 1.25rem;border-bottom:3px solid transparent}
+.step-tab{flex:1;display:flex;align-items:center;gap:8px;padding:.875rem 1.25rem;border-bottom:3px solid transparent;cursor:default}
 .step-tab.active{border-bottom-color:var(--p);background:var(--px)}
-.step-tab.done{border-bottom-color:var(--ok)}
+.step-tab.done{border-bottom-color:var(--ok);cursor:pointer}
+.step-tab.done:hover{background:var(--px)}
+.step-tab.locked{opacity:.55;cursor:not-allowed}
 .step-n{width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .step-tab.active .step-n{background:var(--p);color:#fff}
 .step-tab.done .step-n{background:var(--ok);color:#fff}
@@ -281,9 +283,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
         <p>Complete your onboarding below — your progress saves automatically.</p>
       </div>
       <div class="steps" id="step-tabs">
-        <div class="step-tab active" id="stab1"><div class="step-n" id="sn1">1</div><div class="step-label">Your details</div></div>
-        <div class="step-tab" id="stab2"><div class="step-n" id="sn2">2</div><div class="step-label">Access &amp; platforms</div></div>
-        <div class="step-tab" id="stab3"><div class="step-n" id="sn3">3</div><div class="step-label">Domains</div></div>
+        <div class="step-tab active" id="stab1" onclick="if(_step>1) goStep(1)"><div class="step-n" id="sn1">1</div><div class="step-label">Your details</div></div>
+        <div class="step-tab" id="stab2" onclick="if(_step>2) goStep(2)"><div class="step-n" id="sn2">2</div><div class="step-label">Access &amp; platforms</div></div>
+        <div class="step-tab locked" id="stab3" onclick="onStep3TabClick()"><div class="step-n" id="sn3">🔒</div><div class="step-label" id="stab3-label">Domains</div></div>
       </div>
     </div>
 
@@ -605,23 +607,58 @@ function populateForm() {
   document.getElementById('nav-business-name').textContent = name;
   renderAddresses();
   renderPlatforms();
+  updateStep3Lock(); // set initial lock state based on loaded platform statuses
   renderDomains();
   goStep(c.step || 1);
 }
 
 // ── STEPS ─────────────────────────────────────────────────
+// ── Step 2 completion check ───────────────────────────────
+function isStep2Complete() {
+  const platforms = getPlatforms(settings);
+  return platforms.length === 0 || platforms.every(p => {
+    const s = platformStatus[p.id] || {};
+    return s.done || s.na;
+  });
+}
+
+function updateStep3Lock() {
+  const tab3 = document.getElementById('stab3');
+  const sn3  = document.getElementById('sn3');
+  const lbl3 = document.getElementById('stab3-label');
+  if (!tab3) return;
+  const unlocked = isStep2Complete();
+  tab3.classList.toggle('locked', !unlocked);
+  if (sn3) sn3.textContent = unlocked ? '3' : '🔒';
+  if (lbl3) lbl3.textContent = unlocked ? 'Domains' : 'Domains';
+}
+
+function onStep3TabClick() {
+  if (isStep2Complete()) {
+    if (_step >= 2) goStep(3);
+  } else {
+    const remaining = getPlatforms(settings).filter(p => {
+      const s = platformStatus[p.id] || {};
+      return !s.done && !s.na;
+    }).length;
+    toast(`${remaining} platform${remaining>1?'s':''} still pending — mark each as Done or N/A to continue`, 'err');
+  }
+}
+
 function goStep(n) {
   _step = n;
   [1,2,3].forEach(i => {
     const el = document.getElementById('ws'+i); if(el) el.style.display = i===n?'block':'none';
     const tab = document.getElementById('stab'+i);
-    const sn = document.getElementById('sn'+i);
+    const sn  = document.getElementById('sn'+i);
     if(!tab) return;
     tab.classList.remove('active','done');
     if(i===n) tab.classList.add('active');
-    else if(i<n) { tab.classList.add('done'); sn.textContent='✓'; }
-    else sn.textContent = i;
+    else if(i<n) { tab.classList.add('done'); if(sn) sn.textContent='✓'; }
+    else if(i===3) { /* lock state managed by updateStep3Lock */ }
+    else if(sn) sn.textContent = i;
   });
+  updateStep3Lock(); // re-apply lock state after goStep resets classes
   autoSave();
 }
 
@@ -630,6 +667,14 @@ function nextStep(from) {
     if (!gv('bizName')||!gv('billingEmail')||!gv('contactName')||!gv('phone')) {
       toast('Please fill in all required fields','err'); return;
     }
+  }
+  if (from===2 && !isStep2Complete()) {
+    const remaining = getPlatforms(settings).filter(p => {
+      const s = platformStatus[p.id] || {};
+      return !s.done && !s.na;
+    }).length;
+    toast(`${remaining} platform${remaining>1?'s':''} still pending — mark each as Done or N/A first`, 'err');
+    return;
   }
   goStep(from+1);
 }
@@ -800,6 +845,7 @@ function toggleNA(id, checked) {
   if (checked) platformStatus[id].done = false;
   document.getElementById('plat-'+id).classList.toggle('na', checked);
   renderPlatformStatus(id);
+  updateStep3Lock(); // re-check if step 2 is now complete
   autoSave();
 }
 
@@ -809,6 +855,7 @@ function toggleDone(id, checked) {
   const label = document.getElementById('done-check-'+id);
   if (label) label.classList.toggle('checked', checked);
   renderPlatformStatus(id);
+  updateStep3Lock(); // re-check if step 2 is now complete
   autoSave();
 }
 
