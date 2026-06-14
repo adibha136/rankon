@@ -7,6 +7,10 @@
 <link rel="icon" type="image/jpeg" href="/favicon.jpg">
 <link rel="shortcut icon" type="image/jpeg" href="/favicon.jpg">
 <link rel="apple-touch-icon" href="/favicon.jpg">
+<!-- Synchronous session check: if a token exists in localStorage, add .has-session
+     to <html> BEFORE any rendering so the login screen never flashes on reload. -->
+<script>if(localStorage.getItem('rk_session'))document.documentElement.classList.add('has-session');</script>
+<style>.has-session #login-screen{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
@@ -1013,14 +1017,23 @@ function showLoginErr(msg){
 async function checkAuth(){
   const token = getSession();
   if(!token){ showLoginScreen(); return false; }
+  // Optimistically render nav from cached user so the UI is instant on reload.
+  // The server verification below will refresh the data (and catch expired tokens).
+  const cached = JSON.parse(localStorage.getItem('rk_user')||'null');
+  if(cached) showNavUser(cached);
   try {
     const r = await fetch(API+'/api/auth/me', { headers:{ 'Authorization':'Bearer '+token } });
     if(!r.ok){ clearSession(); showLoginScreen(); return false; }
     const user = await safeJson(r);
-    setSession(token, user);
+    setSession(token, user); // refreshes nav with latest role from server
+    document.getElementById('login-screen').classList.add('hidden');
+    document.documentElement.classList.add('has-session');
+    return true;
+  } catch(e){
+    // Network error — keep cached session, don't force logout
     document.getElementById('login-screen').classList.add('hidden');
     return true;
-  } catch(e){ showLoginScreen(); return false; }
+  }
 }
 function showLoginScreen(){
   document.getElementById('login-screen').classList.remove('hidden');

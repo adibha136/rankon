@@ -27,13 +27,23 @@ const SEED_ADMINS = [
   { email: 'selva@smart-tech.melbourne',    name: 'Selva',    role: 'admin' }
 ];
 
-const sessions = new Map(); // sessionToken → { email, name, role, loginAt }
+// Sessions are stored in MySQL — survive server restarts and redeployments.
+const SESSION_TTL_DAYS = 7;
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  if (!token || !sessions.has(token)) return res.status(401).json({ error: 'unauthorized' });
-  req.user = sessions.get(token);
-  next();
+  if (!token) return res.status(401).json({ error: 'unauthorized' });
+  try {
+    const [rows] = await pool.execute(
+      'SELECT email, name, role FROM sessions WHERE token = ? AND expires_at > NOW()',
+      [token]
+    );
+    if (!rows.length) return res.status(401).json({ error: 'unauthorized' });
+    req.user = rows[0];
+    next();
+  } catch (e) {
+    res.status(500).json({ error: 'auth_error' });
+  }
 }
 function requireAdmin(req, res, next) {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'admin_required', message: 'Admin role required.' });
@@ -130,6 +140,18 @@ async function initDB() {
         added_by   VARCHAR(255) DEFAULT '',
         added_at   DATETIME DEFAULT NULL,
         active     TINYINT(1) DEFAULT 1
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+    // Sessions table — persists across server restarts / redeployments
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        token       VARCHAR(36)  PRIMARY KEY,
+        email       VARCHAR(255) NOT NULL,
+        name        VARCHAR(255) DEFAULT '',
+        role        VARCHAR(50)  DEFAULT 'staff',
+        login_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+        expires_at  DATETIME     NOT NULL,
+        INDEX idx_expires (expires_at)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     `);
     // Seed default admins if table is empty
@@ -377,24 +399,38 @@ app.post('/api/auth/login', async (req, res) => {
     // Use DB name if set, else MS display name
     const name = dbUser.name || msName;
     const sessionToken = uuidv4();
-    sessions.set(sessionToken, { email, name, role: dbUser.role, loginAt: new Date().toISOString() });
-    if (sessions.size > 200) sessions.delete(sessions.keys().next().value);
+    const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
+    await pool.execute(
+      'INSERT INTO sessions (token, email, name, role, expires_at) VALUES (?, ?, ?, ?, ?)',
+      [sessionToken, email, name, dbUser.role, expiresAt]
+    );
+    // Prune expired sessions (best-effort, non-blocking)
+    pool.execute('DELETE FROM sessions WHERE expires_at < NOW()').catch(() => {});
     res.json({ token: sessionToken, email, name, role: dbUser.role });
   } catch (e) {
     res.status(400).json({ error: 'invalid_token', message: e.message });
   }
 });
 
-app.post('/api/auth/logout', (req, res) => {
+app.post('/api/auth/logout', async (req, res) => {
   const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  sessions.delete(token);
+  if (token) await pool.execute('DELETE FROM sessions WHERE token = ?', [token]).catch(() => {});
   res.json({ ok: true });
 });
 
-app.get('/api/auth/me', (req, res) => {
+app.get('/api/auth/me', async (req, res) => {
   const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  if (!token || !sessions.has(token)) return res.status(401).json({ error: 'unauthorized' });
-  res.json(sessions.get(token));
+  if (!token) return res.status(401).json({ error: 'unauthorized' });
+  try {
+    const [rows] = await pool.execute(
+      'SELECT email, name, role, login_at AS loginAt FROM sessions WHERE token = ? AND expires_at > NOW()',
+      [token]
+    );
+    if (!rows.length) return res.status(401).json({ error: 'unauthorized' });
+    res.json(rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: 'auth_error' });
+  }
 });
 
 // ── User management API (admin only) ─────────────────────
