@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="/favicon.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -807,9 +807,10 @@ const MSAL_CLIENT_ID = 'a54c0808-f1e0-4ce0-bd05-ece5f4703592';
 const MSAL_TENANT_ID = '59450111-f685-4ebf-b9bc-d5252cd42c5f';
 const msalConfig = {
   auth: {
-    clientId:    MSAL_CLIENT_ID,
-    authority:   'https://login.microsoftonline.com/' + MSAL_TENANT_ID,
-    redirectUri: window.location.origin
+    clientId:                MSAL_CLIENT_ID,
+    authority:               'https://login.microsoftonline.com/' + MSAL_TENANT_ID,
+    redirectUri:             window.location.origin,
+    navigateToLoginRequestUrl: false   // prevents post-popup redirect in MSAL v3
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false }
 };
