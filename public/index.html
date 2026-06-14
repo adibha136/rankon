@@ -716,7 +716,7 @@ tr:hover td{background:var(--rk-purple-xlight)}
           </div>
           <div class="f-grid f-grid-2">
             <div class="field"><label>Business name <span class="req">*</span></label><input id="bizName" placeholder="Acme Pty Ltd" oninput="clearErr(this);autoSave()"></div>
-            <div class="field"><label>ABN</label><input id="abn" placeholder="12 345 678 901" maxlength="14" oninput="fmtABN(this);clearErr(this);autoSave()"></div>
+            <div class="field"><label>ABN</label><input id="abn" placeholder="12 345 678 901" maxlength="14" oninput="fmtABN(this);clearErr(this);saveBlocked=false;autoSave()"></div>
             <div class="field"><label>Billing email <span class="req">*</span></label><input id="billingEmail" type="email" placeholder="accounts@business.com.au" oninput="clearErr(this);autoSave()"></div>
             <div class="field"><label>Industry</label>
               <select id="industry" onchange="autoSave()">
@@ -902,7 +902,7 @@ tr:hover td{background:var(--rk-purple-xlight)}
 
 <script>
 const API='';
-let currentClientId=null,allClients=[],addresses=[],domains=[],saveTimer=null,_step=1;
+let currentClientId=null,allClients=[],addresses=[],domains=[],saveTimer=null,_step=1,saveBlocked=false;
 
 // ── MSAL / MS Login ───────────────────────────────────────
 const MSAL_CLIENT_ID = 'a54c0808-f1e0-4ce0-bd05-ece5f4703592';
@@ -1125,7 +1125,7 @@ async function editClient(id){
   catch(e){showToast('Could not load client','error',e.message)}
 }
 async function openWizard(client){
-  currentClientId=client.id;
+  currentClientId=client.id; saveBlocked=false; // reset any prior conflict state
   addresses=client.business?.addresses||[];
   domains=client.domains||[];
   sv('bizName',client.business?.name);sv('abn',client.business?.abn);sv('billingEmail',client.business?.billingEmail);sv('industry',client.business?.industry);sv('notes',client.business?.notes);
@@ -1141,17 +1141,35 @@ async function openWizard(client){
 function sv(id,val){const el=document.getElementById(id);if(el)el.value=val||''}
 function gv(id){return document.getElementById(id)?.value?.trim()||''}
 
-function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveClient,800)}
+function autoSave(){
+  if(saveBlocked) return; // stop spamming server while a known conflict exists
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveClient,800);
+}
 async function saveClient(step){
-  if(!currentClientId)return;
-  const ind=document.getElementById('wiz-saving');ind.style.display='block';
+  if(!currentClientId) return;
+  const ind=document.getElementById('wiz-saving'); ind.style.display='block';
   const payload={step:step||_step,
     business:{name:gv('bizName'),abn:gv('abn'),billingEmail:gv('billingEmail'),industry:gv('industry'),addresses,notes:gv('notes')},
     contact:{name:gv('contactName'),phone:gv('phone'),email:gv('contactEmail'),role:gv('role')},
     social:{facebook:gv('fb'),instagram:gv('ig'),tiktok:gv('tt'),linkedin:gv('li')},
     google:{businessProfile:gv('gbp'),analyticsGA4:gv('ga4'),adsCID:gv('gads'),searchConsole:gv('gsc')},
     advertising:{microsoftAds:gv('msads'),metaAds:gv('metaads')},domains};
-  try{await authFetch(API+'/api/clients/'+currentClientId,{method:'PUT',body:JSON.stringify(payload)});}catch(e){}
+  try{
+    const r=await authFetch(API+'/api/clients/'+currentClientId,{method:'PUT',body:JSON.stringify(payload)});
+    if(r.status===409){
+      const d=await r.json().catch(()=>({}));
+      if(d.error==='duplicate_abn'){
+        saveBlocked=true;
+        const other=d.existing?`"${d.existing}"`:'another client';
+        setFieldError('abn',`ABN already used by ${other} — change it to save`);
+        showToast('Duplicate ABN — change the ABN field to resume saving','error');
+      }
+    } else if(r.ok){
+      saveBlocked=false;
+      clearFieldError('abn');
+    }
+  }catch(e){}
   setTimeout(()=>{ind.style.display='none'},700);
 }
 
