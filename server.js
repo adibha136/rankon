@@ -268,42 +268,92 @@ function flagDomainExpiry(domains) {
   });
 }
 
-// ── WHOIS via RDAP ───────────────────────────────────────
+// ── WHOIS via RDAP (with redirect following) ─────────────
 function rdapLookup(domain) {
+  const FAIL = { ns: [], registrar: '', expiry: '', hosting: '', error: true };
   return new Promise((resolve) => {
-    const url = `https://rdap.org/domain/${domain}`;
-    https.get(url, { headers: { 'Accept': 'application/json' } }, (res) => {
-      let body = '';
-      res.on('data', d => body += d);
-      res.on('end', () => {
-        try {
-          const j = JSON.parse(body);
-          const ns = (j.nameservers || []).map(n => (n.ldhName || n.unicodeName || '').toLowerCase()).filter(Boolean);
-          const regEntity = (j.entities || []).find(e => (e.roles || []).includes('registrar'));
-          const registrar = regEntity?.vcardArray?.[1]?.find(v => v[0] === 'fn')?.[3] || '';
-          const expiry = (j.events || []).find(e => e.eventAction === 'expiration')?.eventDate?.slice(0, 10) || '';
-          const hosting = ns.map(n => {
-            if (n.includes('cloudflare'))                     return 'Cloudflare';
-            if (n.includes('awsdns'))                         return 'AWS Route 53';
-            if (n.includes('azure'))                          return 'Azure DNS';
-            if (n.includes('godaddy') || n.includes('domaincontrol')) return 'GoDaddy';
-            if (n.includes('google'))                         return 'Google Domains / Squarespace';
-            if (n.includes('netregistry'))                    return 'Netregistry';
-            if (n.includes('ventraip') || n.includes('vip')) return 'VentraIP';
-            if (n.includes('panthur'))                        return 'Panthur';
-            if (n.includes('crazy'))                          return 'Crazy Domains';
-            if (n.includes('wordpress') || n.includes('wpengine')) return 'WP Engine';
-            if (n.includes('shopify'))                        return 'Shopify';
-            return null;
-          }).find(Boolean) || '';
-          resolve({ ns, registrar, expiry, hosting, error: false });
-        } catch (e) {
-          resolve({ ns: [], registrar: '', expiry: '', hosting: '', error: true });
+    function doFetch(url, hops) {
+      if (hops > 6) return resolve(FAIL);
+      https.get(url, { headers: { 'Accept': 'application/json', 'User-Agent': 'Rankon-CRM/1.0' } }, (res) => {
+        // rdap.org returns HTTP 301/302 redirects to the TLD-specific RDAP server —
+        // Node.js https.get() does NOT follow them automatically, so we must handle them.
+        if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location) {
+          res.resume(); // drain body before redirecting
+          const next = res.headers.location.startsWith('http')
+            ? res.headers.location
+            : 'https://rdap.org' + res.headers.location;
+          return doFetch(next, hops + 1);
         }
-      });
-    }).on('error', () => resolve({ ns: [], registrar: '', expiry: '', hosting: '', error: true }));
+        let body = '';
+        res.on('data', d => body += d);
+        res.on('end', () => {
+          try {
+            const j = JSON.parse(body);
+            const ns = (j.nameservers || []).map(n => (n.ldhName || n.unicodeName || '').toLowerCase()).filter(Boolean);
+            const regEntity = (j.entities || []).find(e => (e.roles || []).includes('registrar'));
+            const registrar = regEntity?.vcardArray?.[1]?.find(v => v[0] === 'fn')?.[3] || '';
+            const expiry = (j.events || []).find(e => e.eventAction === 'expiration')?.eventDate?.slice(0, 10) || '';
+            const hosting = ns.map(n => {
+              if (n.includes('cloudflare'))                     return 'Cloudflare';
+              if (n.includes('awsdns'))                         return 'AWS Route 53';
+              if (n.includes('azure'))                          return 'Azure DNS';
+              if (n.includes('godaddy') || n.includes('domaincontrol')) return 'GoDaddy';
+              if (n.includes('google'))                         return 'Google Domains / Squarespace';
+              if (n.includes('netregistry'))                    return 'Netregistry';
+              if (n.includes('ventraip') || n.includes('vip')) return 'VentraIP';
+              if (n.includes('panthur'))                        return 'Panthur';
+              if (n.includes('crazy'))                          return 'Crazy Domains';
+              if (n.includes('wordpress') || n.includes('wpengine')) return 'WP Engine';
+              if (n.includes('shopify'))                        return 'Shopify';
+              return null;
+            }).find(Boolean) || '';
+            resolve({ ns, registrar, expiry, hosting, error: false });
+          } catch (e) { resolve(FAIL); }
+        });
+      }).on('error', () => resolve(FAIL));
+    }
+    doFetch(`https://rdap.org/domain/${domain}`, 0);
   });
 }
+
+// ── Address autocomplete (Nominatim/OpenStreetMap proxy) ──
+const STATE_ABBR = {
+  'New South Wales': 'NSW', 'Victoria': 'VIC', 'Queensland': 'QLD',
+  'South Australia': 'SA',  'Western Australia': 'WA', 'Tasmania': 'TAS',
+  'Northern Territory': 'NT', 'Australian Capital Territory': 'ACT'
+};
+
+// Public — used by both the admin CRM and client portal (no session needed)
+app.get('/api/address-search', async (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 3) return res.json([]);
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=au&format=json&addressdetails=1&limit=6&dedupe=1`;
+  https.get(url, {
+    headers: {
+      'Accept': 'application/json',
+      'User-Agent': 'Rankon-CRM/1.0 (https://app.rankon.com.au; contact: hello@rankon.com.au)'
+    }
+  }, (resp) => {
+    if ([301, 302, 307, 308].includes(resp.statusCode)) { resp.resume(); return res.json([]); }
+    let body = '';
+    resp.on('data', d => body += d);
+    resp.on('end', () => {
+      try {
+        const results = JSON.parse(body);
+        const mapped = results.map(r => {
+          const a = r.address || {};
+          const street   = [a.house_number, a.road].filter(Boolean).join(' ');
+          const suburb   = a.suburb || a.neighbourhood || a.city_district || a.city || a.town || a.village || '';
+          const state    = STATE_ABBR[a.state] || a.state_district || '';
+          const postcode = a.postcode || '';
+          // Only return results that have at least a street or suburb
+          return street || suburb ? { display: r.display_name, street, suburb, state, postcode } : null;
+        }).filter(Boolean);
+        res.json(mapped);
+      } catch (e) { res.json([]); }
+    });
+  }).on('error', () => res.json([]));
+});
 
 // ── Diagnostic ping (no auth required) ───────────────────
 app.get('/api/ping', (req, res) => {
@@ -674,7 +724,8 @@ app.post('/api/portal/:token/submit', async (req, res) => {
 });
 
 // ── WHOIS ────────────────────────────────────────────────
-app.get('/api/whois/:domain', requireAuth, async (req, res) => {
+// Public — RDAP data is public; client portal calls this without a session token
+app.get('/api/whois/:domain', async (req, res) => {
   const result = await rdapLookup(req.params.domain);
   res.json(result);
 });

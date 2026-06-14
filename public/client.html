@@ -161,6 +161,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 .exp-card h2{font-size:20px;font-weight:800;color:var(--err);margin-bottom:8px}
 .exp-card p{font-size:14px;color:var(--muted);line-height:1.6}
 
+/* ADDRESS SEARCH DROPDOWN */
+.addr-search-wrap{position:relative;margin-bottom:8px}
+.addr-search-wrap input{width:100%;height:40px;padding:0 14px 0 34px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;background:#fff;color:var(--text)}
+.addr-search-wrap input:focus{border-color:var(--p)}
+.addr-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;opacity:.45}
+.addr-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(124,58,237,0.14);z-index:300;overflow:hidden}
+.addr-suggestion{padding:10px 14px;font-size:12.5px;cursor:pointer;color:var(--text);border-bottom:1px solid var(--borderl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.addr-suggestion:last-child{border-bottom:none}
+.addr-suggestion:hover{background:var(--px);color:var(--p)}
+.addr-suggestion small{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+
 /* SAVING */
 .saving-bar{position:fixed;top:62px;right:12px;background:var(--p);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;display:none;z-index:100;box-shadow:0 4px 12px rgba(124,58,237,.3)}
 
@@ -304,6 +315,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
           </div>
           <div class="sec">Business address(es)</div>
           <div id="addrList"></div>
+          <div class="addr-search-wrap">
+            <span class="addr-search-icon">🔍</span>
+            <input id="addrSearch2" placeholder="Search address… e.g. 123 Collins St Melbourne" autocomplete="off"
+              oninput="searchAddressPortal(this.value)" onblur="hideAddrDrop()">
+            <div class="addr-dropdown" id="addrDropdown2"></div>
+          </div>
           <div class="add-row" style="margin-bottom:1.25rem">
             <div class="field"><label>Street</label><input id="addrStreet" placeholder="123 Example St"></div>
             <div class="field"><label>Suburb</label><input id="addrSuburb" placeholder="Melbourne"></div>
@@ -620,6 +637,38 @@ function nextStep(from) {
 // ── FORM HELPERS ──────────────────────────────────────────
 function sv(id,val){const el=document.getElementById(id);if(el)el.value=val||''}
 function gv(id){return document.getElementById(id)?.value?.trim()||''}
+
+// ── Address live search (public endpoint, no auth needed) ─
+let _portalAddrTimer=null, _portalAddrResults=[];
+async function searchAddressPortal(q){
+  clearTimeout(_portalAddrTimer);
+  const dd=document.getElementById('addrDropdown2');
+  if(q.length<3){dd.style.display='none';return;}
+  _portalAddrTimer=setTimeout(async()=>{
+    try{
+      const r=await fetch('/api/address-search?q='+encodeURIComponent(q));
+      const data=await r.json();
+      _portalAddrResults=data;
+      if(!data.length){dd.style.display='none';return;}
+      dd.innerHTML=data.map((a,i)=>
+        `<div class="addr-suggestion" onmousedown="fillAddressPortal(${i})">`+
+        `${a.street?`<strong>${a.street}</strong>, `:''}${a.suburb}${a.state?' '+a.state:''}${a.postcode?' '+a.postcode:''}`+
+        `<small>${a.display}</small></div>`
+      ).join('');
+      dd.style.display='block';
+    }catch(e){dd.style.display='none';}
+  },300);
+}
+function fillAddressPortal(idx){
+  const r=_portalAddrResults[idx];if(!r)return;
+  document.getElementById('addrStreet').value=r.street||'';
+  document.getElementById('addrSuburb').value=r.suburb||'';
+  document.getElementById('addrState').value=r.state||'';
+  document.getElementById('addrPC').value=r.postcode||'';
+  document.getElementById('addrSearch2').value='';
+  document.getElementById('addrDropdown2').style.display='none';
+}
+function hideAddrDrop(){setTimeout(()=>{const d=document.getElementById('addrDropdown2');if(d)d.style.display='none';},160);}
 
 function addAddress() {
   const s=gv('addrStreet'),sub=gv('addrSuburb'),st=gv('addrState'),pc=gv('addrPC');

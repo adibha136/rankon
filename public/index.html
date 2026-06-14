@@ -264,6 +264,17 @@ tr:hover td{background:var(--rk-purple-xlight)}
 .modal-btn.confirm{background:var(--rk-danger);color:#fff}
 .modal-btn.confirm:hover{background:#b91c1c}
 
+/* ── Address autocomplete dropdown ─────────────────────── */
+.addr-search-wrap{position:relative;margin-bottom:8px}
+.addr-search-wrap input{width:100%;height:40px;padding:0 14px 0 36px;border:1.5px solid var(--rk-border);border-radius:10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;background:#fff;color:var(--rk-text)}
+.addr-search-wrap input:focus{border-color:var(--rk-purple);background:#fff}
+.addr-search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;opacity:.5}
+.addr-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid var(--rk-border);border-radius:10px;box-shadow:0 8px 24px rgba(124,58,237,0.14);z-index:300;overflow:hidden}
+.addr-suggestion{padding:10px 14px;font-size:12.5px;cursor:pointer;color:var(--rk-text);border-bottom:1px solid var(--rk-border-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.addr-suggestion:last-child{border-bottom:none}
+.addr-suggestion:hover,.addr-suggestion.focused{background:var(--rk-purple-xlight);color:var(--rk-purple)}
+.addr-suggestion small{display:block;font-size:11px;color:var(--rk-muted);margin-top:1px}
+
 /* ── Always: tables must scroll on small viewports ─────── */
 .dash-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
@@ -730,6 +741,12 @@ tr:hover td{background:var(--rk-purple-xlight)}
             Business addresses
           </div>
           <div id="addrList"></div>
+          <div class="addr-search-wrap">
+            <span class="addr-search-icon">🔍</span>
+            <input id="addrSearch" placeholder="Search address… e.g. 123 Collins St Melbourne" autocomplete="off"
+              oninput="searchAddress(this.value,'crm')" onblur="hideAddrDropdown('addrDropdown')">
+            <div class="addr-dropdown" id="addrDropdown"></div>
+          </div>
           <div class="add-row" style="margin-bottom:1.25rem">
             <div class="field"><label>Street</label><input id="addrStreet" placeholder="123 Example St"></div>
             <div class="field"><label>Suburb</label><input id="addrSuburb" placeholder="Melbourne"></div>
@@ -1239,6 +1256,42 @@ function nextStep(from){
     }
   }
 }
+
+// ── Address live search (Nominatim proxy) ─────────────────
+let _addrTimer=null, _addrResults=[];
+async function searchAddress(q, ctx){
+  clearTimeout(_addrTimer);
+  const ddId = ctx==='crm' ? 'addrDropdown' : 'addrDropdown2';
+  const dd = document.getElementById(ddId);
+  if(!dd) return;
+  if(q.length<3){ dd.style.display='none'; return; }
+  _addrTimer = setTimeout(async ()=>{
+    try{
+      const r = await authFetch(API+'/api/address-search?q='+encodeURIComponent(q));
+      const data = await r.json();
+      _addrResults = data;
+      if(!data.length){ dd.style.display='none'; return; }
+      dd.innerHTML = data.map((a,i)=>
+        `<div class="addr-suggestion" onmousedown="fillAddress(${i},'${ctx}')">`+
+        `${a.street ? `<strong>${a.street}</strong>, ` : ''}${a.suburb}${a.state ? ' '+a.state : ''}${a.postcode ? ' '+a.postcode : ''}`+
+        `<small>${a.display}</small></div>`
+      ).join('');
+      dd.style.display='block';
+    }catch(e){ dd.style.display='none'; }
+  }, 300);
+}
+function fillAddress(idx, ctx){
+  const r=_addrResults[idx]; if(!r) return;
+  document.getElementById('addrStreet').value = r.street  || '';
+  document.getElementById('addrSuburb').value = r.suburb  || '';
+  document.getElementById('addrState').value  = r.state   || '';
+  document.getElementById('addrPC').value     = r.postcode|| '';
+  const searchId = ctx==='crm' ? 'addrSearch' : 'addrSearch2';
+  const ddId     = ctx==='crm' ? 'addrDropdown' : 'addrDropdown2';
+  document.getElementById(searchId).value='';
+  document.getElementById(ddId).style.display='none';
+}
+function hideAddrDropdown(ddId){ setTimeout(()=>{ const d=document.getElementById(ddId); if(d) d.style.display='none'; },160); }
 
 function addAddress(){
   const s=gv('addrStreet'),sub=gv('addrSuburb'),st=gv('addrState'),pc=gv('addrPC');
