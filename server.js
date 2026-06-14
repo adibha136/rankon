@@ -840,6 +840,16 @@ app.post('/api/clients/:id/send-onboarding', requireAuth, async (req, res) => {
   }
 });
 
+// ── Health check (for Hostinger / uptime monitors) ───────
+app.get('/health', async (req, res) => {
+  try {
+    await pool.execute('SELECT 1');
+    res.json({ status: 'healthy', uptime: process.uptime(), db: 'connected', env: process.env.NODE_ENV || 'production' });
+  } catch (e) {
+    res.status(503).json({ status: 'unhealthy', db: 'disconnected', error: e.message });
+  }
+});
+
 // ── Catch-all: unknown /api/* → always JSON, never HTML ──
 app.use('/api', (req, res) => {
   console.warn(`[404] Unmatched route: ${req.method} ${req.originalUrl}`);
