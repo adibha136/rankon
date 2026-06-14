@@ -267,6 +267,35 @@ tr:hover td{background:var(--rk-purple-xlight)}
 .modal-btn.cancel:hover{border-color:var(--rk-purple);color:var(--rk-purple);background:var(--rk-purple-xlight)}
 .modal-btn.confirm{background:var(--rk-danger);color:#fff}
 .modal-btn.confirm:hover{background:#b91c1c}
+/* ── Client details view modal ─────────────────────────── */
+.view-modal-box{background:#fff;border-radius:20px;width:100%;max-width:740px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.35);animation:popIn .2s ease;overflow:hidden}
+.view-modal-head{background:linear-gradient(135deg,var(--rk-navy) 0%,#1e0a4a 100%);padding:1.5rem 2rem;flex-shrink:0;position:relative;overflow:hidden}
+.view-modal-head::after{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(124,58,237,.2);pointer-events:none}
+.view-modal-title{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;margin-bottom:4px}
+.view-modal-sub{font-size:13px;color:rgba(255,255,255,.5)}
+.view-modal-body{overflow-y:auto;padding:1.5rem 2rem 2rem;flex:1}
+.view-modal-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.12);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;z-index:1}
+.view-modal-close:hover{background:rgba(255,255,255,.25)}
+.view-modal-actions{padding:1rem 2rem;border-top:1px solid var(--rk-border);display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;background:#fafaf9}
+.vs{margin-bottom:1.25rem}
+.vs-title{font-size:10px;font-weight:700;color:var(--rk-purple);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.625rem;padding-bottom:6px;border-bottom:1.5px solid var(--rk-border-light)}
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+.vs-row{display:flex;flex-direction:column;gap:2px;padding:5px 0;border-bottom:1px solid var(--rk-border-light)}
+.vs-row:last-child{border-bottom:none}
+.vs-label{font-size:10.5px;font-weight:600;color:var(--rk-muted);text-transform:uppercase;letter-spacing:.4px}
+.vs-val{font-size:13px;color:var(--rk-text);word-break:break-word}
+.vs-val a{color:var(--rk-purple);text-decoration:none}
+.vs-val a:hover{text-decoration:underline}
+.vs-val.muted{color:var(--rk-muted-light)}
+.vs-chip{display:inline-block;background:var(--rk-purple-xlight);color:var(--rk-purple);border:1px solid var(--rk-border-light);border-radius:20px;padding:2px 10px;font-size:11.5px;font-weight:600;margin:2px 2px 2px 0}
+.vs-domain{background:var(--rk-bg);border:1.5px solid var(--rk-border);border-radius:10px;padding:.75rem 1rem;margin-bottom:.5rem}
+.vs-domain-name{font-size:13px;font-weight:700;color:var(--rk-navy);margin-bottom:5px}
+.vs-domain-meta{display:grid;grid-template-columns:1fr 1fr;gap:3px 16px;font-size:11.5px;color:var(--rk-muted)}
+.vs-log-entry{display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--rk-border-light);align-items:flex-start}
+.vs-log-entry:last-child{border-bottom:none}
+.vs-log-time{font-size:11px;color:var(--rk-muted);white-space:nowrap;flex-shrink:0;padding-top:1px}
+.vs-log-detail{font-size:12px;color:var(--rk-text);line-height:1.5}
+@media(max-width:640px){.view-modal-box{border-radius:16px;max-height:95vh}.view-modal-body,.view-modal-head{padding-left:1.25rem;padding-right:1.25rem}.vs-grid{grid-template-columns:1fr}}
 
 /* ── Address autocomplete dropdown ─────────────────────── */
 .addr-search-wrap{position:relative;margin-bottom:8px}
@@ -408,6 +437,19 @@ tr:hover td{background:var(--rk-purple-xlight)}
       <button class="modal-btn cancel" onclick="closeDelModal()">No, Cancel</button>
       <button class="modal-btn confirm" onclick="confirmDelete()">Yes, Delete</button>
     </div>
+  </div>
+</div>
+
+<!-- ═══ CLIENT DETAILS VIEW MODAL ═══ -->
+<div id="view-modal" class="modal-overlay" onclick="closeViewModal()">
+  <div class="view-modal-box" onclick="event.stopPropagation()">
+    <div class="view-modal-head">
+      <button class="view-modal-close" onclick="closeViewModal()">✕</button>
+      <div class="view-modal-title" id="vm-title">Client Details</div>
+      <div class="view-modal-sub" id="vm-sub"></div>
+    </div>
+    <div class="view-modal-body" id="vm-body"></div>
+    <div class="view-modal-actions" id="vm-actions"></div>
   </div>
 </div>
 
@@ -1095,6 +1137,7 @@ function renderTable(){
     <td>${trackingHtml}</td>
     <td>${c.expiringDomains>0?`<span style="font-size:11px;background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:2px 8px;border-radius:20px;font-weight:600">⚠ ${c.expiringDomains} domain${c.expiringDomains>1?'s':''} expiring</span>`:'<span style="color:var(--rk-muted-light);font-size:12px">—</span>'}</td>
     <td><div class="tbl-actions">
+      <button class="tbl-btn" style="color:var(--rk-purple);border-color:#ddd6fe;font-weight:700" onclick="viewClient('${c.id}')">👁 View</button>
       <button class="tbl-btn" onclick="editClient('${c.id}')">Edit</button>
       <button class="tbl-btn" style="color:var(--rk-purple);border-color:#ddd6fe" onclick="sendOnboardingEmail('${c.id}','${(c.businessName||'Client').replace(/'/g,'')}')">📧 Email</button>
       <button class="tbl-btn" onclick="copyClientLink('${c.token}')">Copy link</button>
@@ -1111,7 +1154,128 @@ function stepBadge(c){
   return'<span class="badge badge-step2">Step '+c.step+'</span>';
 }
 function fmtDate(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'})}
+function fmtDateTime(iso){if(!iso)return'—';return new Date(iso).toLocaleString('en-AU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
 function copyClientLink(token){navigator.clipboard.writeText(window.location.origin+'/onboard/'+token).then(()=>showToast('Onboarding link copied','success'))}
+
+// ── Client Details View Modal ─────────────────────────────
+function closeViewModal(){ document.getElementById('view-modal').classList.remove('show'); }
+
+async function viewClient(id){
+  try{
+    const r = await authFetch(API+'/api/clients/'+id);
+    const c = await safeJson(r);
+    if(!r.ok) return showToast('Could not load client','error');
+    _renderViewModal(c);
+    document.getElementById('view-modal').classList.add('show');
+  }catch(e){ showToast('Could not load client','error'); }
+}
+
+function _vr(label, val, link){
+  const display = val ? (link ? `<a href="${link}" target="_blank" rel="noopener">${val}</a>` : val) : `<span class="muted">—</span>`;
+  return `<div class="vs-row"><span class="vs-label">${label}</span><span class="vs-val">${display}</span></div>`;
+}
+
+function _renderViewModal(c){
+  const biz     = c.business    || {};
+  const contact = c.contact     || {};
+  const social  = c.social      || {};
+  const google  = c.google      || {};
+  const ads     = c.advertising || {};
+  const domains = c.domains     || [];
+  const log     = (c.accessLog  || []).slice().reverse().slice(0,10);
+
+  document.getElementById('vm-title').textContent = biz.name || 'Unnamed Client';
+  document.getElementById('vm-sub').innerHTML =
+    (biz.industry ? `<span style="margin-right:12px">🏭 ${biz.industry}</span>` : '') +
+    (c.completed  ? '<span style="background:rgba(5,150,105,.2);color:#34d399;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">✓ Complete</span>'
+                  : `<span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600">Step ${c.step||1}</span>`);
+
+  const sections = [];
+
+  // ── Business ──────────────────────────────────────────────
+  sections.push(`<div class="vs"><div class="vs-title">🏢 Business Details</div>
+    <div class="vs-grid">
+      ${_vr('ABN', biz.abn)}
+      ${_vr('Billing Email', biz.billingEmail, biz.billingEmail?'mailto:'+biz.billingEmail:null)}
+    </div>
+    ${(biz.addresses||[]).length ? `<div class="vs-row"><span class="vs-label">Addresses</span><span class="vs-val">${(biz.addresses).map(a=>`📍 ${a}`).join('<br>')}</span></div>` : ''}
+    ${biz.notes ? `<div class="vs-row"><span class="vs-label">Notes</span><span class="vs-val">${biz.notes}</span></div>` : ''}
+  </div>`);
+
+  // ── Contact ───────────────────────────────────────────────
+  sections.push(`<div class="vs"><div class="vs-title">👤 Contact</div>
+    <div class="vs-grid">
+      ${_vr('Name', contact.name)}
+      ${_vr('Role / Title', contact.role)}
+      ${_vr('Phone', contact.phone, contact.phone?'tel:'+contact.phone:null)}
+      ${_vr('Email', contact.email, contact.email?'mailto:'+contact.email:null)}
+    </div>
+  </div>`);
+
+  // ── Social Media ──────────────────────────────────────────
+  const hasSocial = social.facebook||social.instagram||social.tiktok||social.linkedin;
+  if(hasSocial) sections.push(`<div class="vs"><div class="vs-title">📱 Social Media</div>
+    <div class="vs-grid">
+      ${social.facebook  ? _vr('Facebook Page', social.facebook, social.facebook) : ''}
+      ${social.instagram ? _vr('Instagram', social.instagram, social.instagram.startsWith('http')?social.instagram:null) : ''}
+      ${social.tiktok    ? _vr('TikTok', social.tiktok) : ''}
+      ${social.linkedin  ? _vr('LinkedIn', social.linkedin, social.linkedin) : ''}
+    </div>
+  </div>`);
+
+  // ── Google ────────────────────────────────────────────────
+  const hasGoogle = google.businessProfile||google.analyticsGA4||google.adsCID||google.searchConsole;
+  if(hasGoogle) sections.push(`<div class="vs"><div class="vs-title">🔍 Google</div>
+    <div class="vs-grid">
+      ${google.businessProfile ? _vr('Business Profile', google.businessProfile, google.businessProfile) : ''}
+      ${google.analyticsGA4    ? _vr('GA4 Property', google.analyticsGA4) : ''}
+      ${google.adsCID          ? _vr('Google Ads CID', google.adsCID) : ''}
+      ${google.searchConsole   ? _vr('Search Console', google.searchConsole) : ''}
+    </div>
+  </div>`);
+
+  // ── Advertising ───────────────────────────────────────────
+  const hasAds = ads.microsoftAds||ads.metaAds;
+  if(hasAds) sections.push(`<div class="vs"><div class="vs-title">📢 Advertising</div>
+    <div class="vs-grid">
+      ${ads.microsoftAds ? _vr('Microsoft Ads', ads.microsoftAds) : ''}
+      ${ads.metaAds      ? _vr('Meta Ads Manager', ads.metaAds) : ''}
+    </div>
+  </div>`);
+
+  // ── Domains ───────────────────────────────────────────────
+  if(domains.length) sections.push(`<div class="vs"><div class="vs-title">🌐 Domains</div>
+    ${domains.map(d=>`<div class="vs-domain">
+      <div class="vs-domain-name">🌐 ${d.domain}</div>
+      <div class="vs-domain-meta">
+        ${d.registrar?`<span>Registrar: <strong>${d.registrar}</strong></span>`:''}
+        ${d.expiry?`<span>Expiry: <strong>${d.expiry}</strong></span>`:''}
+        ${d.hosting?`<span>Hosting: <strong>${d.hosting}</strong></span>`:''}
+        ${(d.ns||[]).length?`<span style="grid-column:1/-1">NS: ${d.ns.slice(0,3).join(', ')}</span>`:''}
+      </div>
+    </div>`).join('')}
+  </div>`);
+
+  // ── Access Log ────────────────────────────────────────────
+  if(log.length) sections.push(`<div class="vs"><div class="vs-title">👁 Access Log (last ${log.length} opens)</div>
+    ${log.map(e=>{
+      const loc=[e.city,e.region,e.country].filter(Boolean).join(', ');
+      return`<div class="vs-log-entry">
+        <span class="vs-log-time">${fmtDateTime(e.at)}</span>
+        <span class="vs-log-detail">🌐 ${e.ip||'—'}${loc?`<br>📍 ${loc}`:''}${e.isp?`<br>🏢 ${e.isp}`:''}</span>
+      </div>`;
+    }).join('')}
+  </div>`);
+
+  document.getElementById('vm-body').innerHTML = sections.join('');
+
+  // Footer quick-action buttons
+  document.getElementById('vm-actions').innerHTML =
+    `<button class="tbl-btn" style="color:var(--rk-purple);border-color:#ddd6fe;font-weight:600" onclick="closeViewModal();editClient('${c.id}')">✏️ Edit</button>`+
+    `<button class="tbl-btn" onclick="closeViewModal();sendOnboardingEmail('${c.id}','${(biz.name||'Client').replace(/'/g,'')}')">📧 Email client</button>`+
+    `<button class="tbl-btn" onclick="copyClientLink('${c.token}');showToast('Link copied','success')">🔗 Copy link</button>`+
+    `<button class="tbl-btn" onclick="closeViewModal();exportClient('${c.id}')">📤 Export vault</button>`;
+}
 async function regenToken(id){
   if(!confirm('Regenerate link? The old link stops working.'))return;
   const r=await authFetch(API+'/api/clients/'+id+'/regenerate-token',{method:'POST'});
