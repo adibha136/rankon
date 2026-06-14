@@ -264,14 +264,94 @@ tr:hover td{background:var(--rk-purple-xlight)}
 .modal-btn.confirm{background:var(--rk-danger);color:#fff}
 .modal-btn.confirm:hover{background:#b91c1c}
 
+/* ── Always: tables must scroll on small viewports ─────── */
+.dash-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* ── 1024px: Laptop / small desktop ─────────────────────── */
+@media(max-width:1024px){
+  .nav,.dash-hero,.dash-table-wrap,.dash-toolbar{padding-left:1.5rem;padding-right:1.5rem}
+  .wizard-wrap{padding:0 1.25rem 4rem}
+}
+
+/* ── 768px: Tablet ───────────────────────────────────────── */
+@media(max-width:768px){
+  .nav{padding:0 1rem}
+  .nav-divider,.nav-tag{display:none}
+  #nav-email{display:none}
+  .nav-user{padding:5px 8px 5px 5px}
+  .nav-link{padding:7px 9px;font-size:13px}
+  .nav-cta{padding:8px 14px;font-size:13px}
+  .nav-logout{padding:5px 11px;font-size:12px}
+  .dash-hero{padding:2rem 1.25rem 1.5rem}
+  .dash-hero h1{font-size:22px}
+  .dash-table-wrap{padding:1.25rem 1rem}
+  .dash-toolbar{padding:.75rem 1rem;flex-wrap:wrap}
+  .dash-toolbar input{width:100%;max-width:none}
+  .stat{padding:1.1rem 1.25rem}
+  .wiz-body{padding:1.5rem}
+  table{font-size:12.5px}
+  td,th{padding:10px 12px}
+  .tbl-actions{flex-wrap:wrap}
+  .wizard-wrap{padding:0 .75rem 3rem}
+}
+
+/* ── 640px: Mobile ────────────────────────────────────────── */
 @media(max-width:640px){
+  .nav{padding:0 .875rem;height:54px}
+  .nav-divider,.nav-tag{display:none}
+  /* Dashboard is reachable via logo — hide the redundant link */
+  #nav-dashboard-btn{display:none}
+  /* Hide email in user chip — name + role is enough */
+  #nav-email{display:none}
+  .nav-link{padding:7px 9px;font-size:12.5px}
+  .nav-cta{padding:8px 11px}
+  /* Show only the + icon on smallest CTAs */
+  .nav-cta-label{display:none}
+  .nav-user{gap:5px;padding:4px 7px 4px 4px}
+  .nav-user-avatar{width:26px;height:26px;font-size:11px}
+  .nav-logout{padding:5px 9px;font-size:12px}
+  /* Grids */
   .f-grid-2,.f-grid-3,.platform-grid{grid-template-columns:1fr}
-  .wizard-wrap{margin:1rem auto}
+  /* Hero */
+  .dash-hero{padding:1.5rem 1rem 1.25rem}
+  .dash-hero h1{font-size:19px;letter-spacing:-.3px}
+  .dash-hero p{font-size:13px}
+  .dash-hero-pills{gap:6px;margin-top:1rem}
+  /* Stats */
+  .stat{padding:1rem 1rem}
+  .stat-n{font-size:24px}
+  /* Table */
+  .dash-table-wrap{padding:.875rem .875rem}
+  /* Toolbar */
+  .dash-toolbar{padding:.75rem .875rem;flex-direction:column;align-items:stretch;gap:8px}
+  .dash-toolbar input{width:100%}
+  /* Wizard */
+  .wizard-wrap{margin:.75rem auto;padding:0 .625rem 3rem}
   .wiz-body{padding:1.25rem}
-  .dash-hero,.dash-table-wrap{padding-left:1.25rem;padding-right:1.25rem}
-  .dash-toolbar{padding-left:1.25rem;padding-right:1.25rem}
-  .nav{padding:0 1.25rem}
-  .wiz-steps{overflow-x:auto}
+  .wiz-steps{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .wiz-step{padding:.875rem 1rem}
+  /* Modals */
+  .modal-box{padding:1.5rem 1.25rem 1.25rem;border-radius:16px}
+  /* Page containers */
+  div[style*="max-width:820px"],div[style*="max-width:760px"]{padding-left:.875rem !important;padding-right:.875rem !important}
+}
+
+/* ── 480px: Small phone ──────────────────────────────────── */
+@media(max-width:480px){
+  .nav{padding:0 .625rem;height:50px}
+  .nav-logo img{height:28px !important}
+  .nav-link{padding:6px 7px;font-size:12px}
+  .nav-user-avatar{width:24px;height:24px;font-size:10px}
+  #nav-username{font-size:12px}
+  #nav-role-badge{font-size:9px}
+  .dash-hero h1{font-size:17px}
+  .stat-n{font-size:22px}
+  .stat-l{font-size:11px}
+  .wiz-body{padding:1rem}
+  .wiz-step-label{font-size:12px}
+  td,th{padding:9px 10px;font-size:12px}
+  .tbl-btn{padding:4px 9px;font-size:11px}
+  .modal-box{margin:0 .5rem;padding:1.25rem 1rem 1rem}
 }
 </style>
 </head>
@@ -323,12 +403,12 @@ tr:hover td{background:var(--rk-purple-xlight)}
   <div class="nav-divider"></div>
   <span class="nav-tag">Client CRM</span>
   <div class="nav-actions">
-    <button class="nav-link" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-link" id="nav-dashboard-btn" onclick="showPage('dashboard')">Dashboard</button>
     <button class="nav-link" id="nav-users-btn" onclick="showPage('users');loadUsers()" style="display:none">👥 Users</button>
     <button class="nav-link" onclick="showPage('settings');loadSettings()">⚙ Settings</button>
     <button class="nav-cta" id="nav-new-client-btn" onclick="newClient()">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-      New client
+      <span class="nav-cta-label">New client</span>
     </button>
     <div class="nav-user" id="nav-user" style="display:none">
       <div class="nav-user-avatar" id="nav-avatar">?</div>

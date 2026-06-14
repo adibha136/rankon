@@ -170,7 +170,43 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 .toast.ok{background:var(--ok)}
 .toast.err{background:var(--err)}
 
-@media(max-width:560px){.fg2{grid-template-columns:1fr}.card-body{padding:1.25rem}.nav{padding:0 1rem}.wrap{padding:1rem .75rem 3rem}}
+/* ── 768px: Tablet ── */
+@media(max-width:768px){
+  .nav{padding:0 1.25rem}
+  .wrap{padding:1.5rem .875rem 3rem}
+  .card-body{padding:1.5rem}
+  .card-head{padding:1.5rem 1.5rem 1.25rem}
+  .card-head h1{font-size:18px}
+  .step-tab{padding:.75rem 1rem}
+  .step-label{font-size:12px}
+  .steps{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+/* ── 560px: Mobile ── */
+@media(max-width:560px){
+  .fg2{grid-template-columns:1fr}
+  .card-body{padding:1.25rem}
+  .nav{padding:0 1rem}
+  .wrap{padding:1rem .75rem 3rem}
+  .card-head{padding:1.25rem 1.25rem 1rem}
+  .card-head h1{font-size:16px}
+  .step-tab{padding:.625rem .875rem;gap:6px}
+  .step-n{width:20px;height:20px;font-size:10px}
+  .step-label{font-size:11.5px}
+  .add-row{flex-wrap:wrap}
+}
+
+/* ── 420px: Small phone ── */
+@media(max-width:420px){
+  .nav{padding:0 .75rem;height:52px}
+  .nav-logo img{height:26px !important;max-width:110px !important}
+  .wrap{padding:.875rem .625rem 3rem}
+  .card-body{padding:1rem}
+  .card-head h1{font-size:15px}
+  .step-tab{padding:.5rem .75rem}
+  .step-label{display:none}
+  .pin-wrap,.ty-wrap,.exp-wrap{padding:0 .75rem}
+}
 </style>
 </head>
 <body>
